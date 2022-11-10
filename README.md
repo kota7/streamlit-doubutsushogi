@@ -1,7 +1,7 @@
 streamlit-doubutsushogi
 =============
 [![](https://badge.fury.io/py/streamlit-doubutsushogi.svg)](https://badge.fury.io/py/streamlit-doubutsushogi)
-[![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://kota7-doubutsushogi-py-streamlitapp-fyc9on.streamlit.app/)
+[![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://kota7-streamlit-doubutsushogi-appstreamlit-app-weir3f.streamlit.app/)
 
 A streamlit custom component for interactive board of [doubutsushogi (animal chess)](https://en.wikipedia.org/wiki/D%C5%8Dbutsu_sh%C5%8Dgi) game.
 
