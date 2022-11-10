@@ -51,6 +51,5 @@ An interactive app is deployed on the [Streamlit Cloud]((https://kota7-doubutsus
 To run the app on the computer locally, run the following:
 
 ```shell
-pip3 install -U streamlit-doubutsushogi
-python3 -m streamlit run app/streamlit_app.py
+streamlit run app/streamlit_app.py
 ```
