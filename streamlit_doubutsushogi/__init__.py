@@ -12,7 +12,7 @@ logger = getLogger(__name__)
 # the component, and True when we're ready to package and distribute it.
 # (This is, of course, optional - there are innumerable ways to manage your
 # release process.)
-_RELEASE = True
+_RELEASE = False
 
 # Declare a Streamlit component. `declare_component` returns a function
 # that is used to create instances of the component. We're naming this
@@ -104,12 +104,9 @@ def _parse_component_value(component_value: list)-> tuple:
 # During development, we can run this just as we would any other Streamlit
 # app: `$ streamlit run my_component/__init__.py`
 if not _RELEASE:
-    import streamlit as st
-
-    # Create an instance of our component with a constant `name` arg, and
-    # print its output value.
-    #ret = st_doubutsushogi(piecename="emoji1")
-    ret = st_doubutsushogi()
-    
-    print(ret)
-
+    import os
+    import sys
+    appdir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../app"))
+    sys.path.insert(0, appdir)
+    import streamlit_app
+    streamlit_app.main()
