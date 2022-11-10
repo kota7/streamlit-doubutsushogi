@@ -103,10 +103,17 @@ def _parse_component_value(component_value: list)-> tuple:
 # Add some test code to play with the component while it's in development.
 # During development, we can run this just as we would any other Streamlit
 # app: `$ streamlit run my_component/__init__.py`
-if not _RELEASE:
-    import os
-    import sys
-    appdir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../app"))
-    sys.path.insert(0, appdir)
-    import streamlit_app
-    streamlit_app.main()
+if __name__ == "__main__":
+    if not _RELEASE:
+        # test run of the local app
+        # to do this, we add this component to the pythonpath, so that the app uses this local package
+        # we also add the app directory and call its main function here
+        import os
+        import sys
+
+        componentdir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../"))
+        appdir = os.path.join(componentdir, "app")
+        sys.path.insert(0, appdir)
+        sys.path.insert(0, componentdir)
+        import streamlit_app
+        streamlit_app.main()
