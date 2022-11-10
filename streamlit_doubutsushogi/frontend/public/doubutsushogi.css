@@ -1,0 +1,80 @@
+.prisoner-cell {
+  background-color: #efefef;
+  vertical-align: bottom;
+}
+
+.prisoner-value {
+  vertical-align: bottom;
+}
+
+.prisoner-piece {
+  filter: brightness(95%);
+}
+
+.cell {
+  background-color: #d1edf2;
+  border: 1px #777777 dashed;
+  text-align: center;
+  vertical-align: middle;
+  display: inline-block;
+}
+
+.opponent {
+  transform: rotate(180deg);
+}
+
+.board {
+  table-layout: fixed;
+}
+
+.piece {
+  filter: brightness(95%);
+  /* box-shadow: 2px 2px 2px #464646, -2px -2px 2px #464646; }; */
+}
+
+/* Firefox old*/
+@-moz-keyframes blink {
+  0%   { opacity :1.0; }
+  50%  { opacity :0.2; }
+  100% { opacity :1.0; }
+} 
+
+@-webkit-keyframes blink {
+  0%   { opacity :1.0; }
+  50%  { opacity :0.2; }
+  100% { opacity :1.0; }
+}
+/* IE */
+@-ms-keyframes blink {
+  0%   { opacity :1.0; }
+  50%  { opacity :0.2; }
+  100% { opacity :1.0; }
+} 
+/* Opera and prob css3 final iteration */
+@keyframes blink {
+  0%   { opacity :1.0; }
+  50%  { opacity :0.2; }
+  100% { opacity :1.0; }
+} 
+
+.selected {
+	-webkit-animation: blink 1.7s linear infinite alternate;
+  -moz-animation: blink 1.7s linear infinite alternate;
+  animation: blink 1.7s linear infinite alternate;  
+  /*
+  filter: brightness(110%);
+  box-shadow: 5px 5px 1px  #464646, -5px -5px 1px #464646;
+  border: 2px #ee6666 solid;
+  border-radius: 10%;
+  */
+}
+
+.not-highlighted {
+  filter: brightness(70%);
+}
+
+/*
+.highlighted {
+  filter: brightness(80%);
+}
+*/
