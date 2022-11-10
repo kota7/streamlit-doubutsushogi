@@ -1,0 +1,3 @@
+pandas
+doubutsushogi
+streamlit-doubutsushogi
