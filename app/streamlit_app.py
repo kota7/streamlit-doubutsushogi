@@ -4,16 +4,6 @@ from logging import getLogger, basicConfig
 logger = getLogger(__name__)
 basicConfig(level=20)
 
-def _parent_directory_to_path():
-    import sys
-    import os
-    # add previous folder to the package path
-    # so that it recognize ./doubutsushogi as the package
-    p = os.path.abspath(os.path.join(os.path.dirname(__file__), "../"))
-    logger.info("Adding '%s' to the package path", p)
-    sys.path.insert(0, p)
-_parent_directory_to_path()
-
 import streamlit as st
 from doubutsushogi import evaluate_states, initial_state
 
