@@ -12,6 +12,7 @@ interface State {
   isTurn1: boolean       // indicates that the next mover is the player 1 (bottom to top)
   selectedIndex: number  // index of selected cell, negative indicates no cell is selected
   images: string[]       // piece images, length 6 (include empty)
+  initData: number[]     // initial state data, length 19
   isFocused: boolean
 }
 
@@ -26,8 +27,25 @@ class DoubutsuShogi extends StreamlitComponentBase<State> {
     isTurn1: true,
     selectedIndex: -1,
     images: ["", "", "", "", ""],
+    initData: [-3, -5, -2, 0, -1, 0, 0, 1, 0, 2, 5, 3, 0, 0, 0, 0, 0, 0, 1],
     isFocused: false
     //,numClicks: 0    
+  }
+
+  componentDidMount(): void {
+    console.log("start componentDidMount")
+    this.state.board = this.state.initData.slice(0, 12)
+    this.state.prisoners = this.state.initData.slice(12, 18)
+    this.state.isTurn1 = this.state.initData[18]===1
+
+    // This is copied from the source of StreamlitComponentBase
+    // By this, we tell Streamlit that our height has changed.
+    Streamlit.setFrameHeight();  
+    /*
+    const ret = this.state.board.concat(this.state.prisoners).concat(
+      this.state.isTurn1 ? 1 : 2, this._gameStatus())
+    Streamlit.setComponentValue(ret)
+    */
   }
 
   public render = (): ReactNode => {
@@ -38,6 +56,10 @@ class DoubutsuShogi extends StreamlitComponentBase<State> {
     const prisoner_imgsize = this.props.args["prisoner_imgsize"]
     const cellsize = this.props.args["cellsize"]
     const piece_imgsize = this.props.args["piece_imgsize"]
+    const init_data = this.props.args["init_data"]
+    this.state.initData = init_data
+    console.log("init_data given", init_data)
+    console.log(this.state.initData)
 
     // Streamlit sends us a theme object via props that we can use to ensure
     // that our component has visuals that match the active theme in a
@@ -63,16 +85,17 @@ class DoubutsuShogi extends StreamlitComponentBase<State> {
       this.state.isTurn1 = (data[18] === 1)
     }
     */
+    
+    console.log("loading piece images")
     const empty  = require(`./pieces/empty.png`)
     const hiyoko = require(`./pieces/${piecename}/hiyoko.png`)
     const zou    = require(`./pieces/${piecename}/zou.png`)
     const kirin  = require(`./pieces/${piecename}/kirin.png`)
     const tori   = require(`./pieces/${piecename}/tori.png`)
     const lion   = require(`./pieces/${piecename}/lion.png`)
-    //const images = [ empty, hiyoko, zou, kirin, tori, lion ]
     this.state.images = [ empty, hiyoko, zou, kirin, tori, lion ]
+    
     const texts = ["", "hiyoko", "zou", "kirin", "tori", "lion"]
-
     const srcs = this.state.board.map( (i: number) => this.state.images[Math.abs(i)])
     const alts = this.state.board.map( (i: number) => texts[Math.abs(i)])
     const opps = this.state.board.map( (i: number) => i < 0 ? "piece opponent" : i > 0 ? "piece own" : "piece empty")

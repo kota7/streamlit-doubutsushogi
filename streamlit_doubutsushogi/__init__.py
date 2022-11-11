@@ -50,7 +50,7 @@ else:
 # `declare_component` and call it done. The wrapper allows us to customize
 # our component's API: we can pre-process its input args, post-process its
 # output value, and add a docstring for users.
-def st_doubutsushogi(piecename="emoji1", cellsize="90px", piece_imgsize="80px", prisoner_imgsize="40px"):
+def st_doubutsushogi(state=None, piecename="emoji1", cellsize="90px", piece_imgsize="80px", prisoner_imgsize="40px"):
     """
     Create a new instance of st_doubutsushogi, a game UI.
 
@@ -68,7 +68,9 @@ def st_doubutsushogi(piecename="emoji1", cellsize="90px", piece_imgsize="80px", 
     #
     # "default" is a special argument that specifies the initial return
     # value of the component before the user has interacted with it.
-    s = State.initial_state()
+    s = state or State.initial_state()
+    #print(s)
+    
     default = list(s._data) + [s.status]
     assert piecename in ("emoji1", "emoji2", "emoji3", "hiragana")
     component_value = _component_func(
@@ -76,6 +78,7 @@ def st_doubutsushogi(piecename="emoji1", cellsize="90px", piece_imgsize="80px", 
         cellsize=cellsize,
         piece_imgsize=piece_imgsize,
         prisoner_imgsize=prisoner_imgsize,
+        init_data=s._data,
         default=default
     )
 
