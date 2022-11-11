@@ -12,7 +12,7 @@ logger = getLogger(__name__)
 # the component, and True when we're ready to package and distribute it.
 # (This is, of course, optional - there are innumerable ways to manage your
 # release process.)
-_RELEASE = True
+_RELEASE = False
 
 # Declare a Streamlit component. `declare_component` returns a function
 # that is used to create instances of the component. We're naming this
@@ -50,7 +50,7 @@ else:
 # `declare_component` and call it done. The wrapper allows us to customize
 # our component's API: we can pre-process its input args, post-process its
 # output value, and add a docstring for users.
-def st_doubutsushogi(piecename="emoji1", cellsize="90px", piece_imgsize="80px", prisoner_imgsize="40px"):
+def st_doubutsushogi(state=None, piecename="emoji1", cellsize="90px", piece_imgsize="80px", prisoner_imgsize="40px"):
     """
     Create a new instance of st_doubutsushogi, a game UI.
 
@@ -68,7 +68,9 @@ def st_doubutsushogi(piecename="emoji1", cellsize="90px", piece_imgsize="80px", 
     #
     # "default" is a special argument that specifies the initial return
     # value of the component before the user has interacted with it.
-    s = State.initial_state()
+    s = state or State.initial_state()
+    #print(s)
+    
     default = list(s._data) + [s.status]
     assert piecename in ("emoji1", "emoji2", "emoji3", "hiragana")
     component_value = _component_func(
@@ -76,6 +78,7 @@ def st_doubutsushogi(piecename="emoji1", cellsize="90px", piece_imgsize="80px", 
         cellsize=cellsize,
         piece_imgsize=piece_imgsize,
         prisoner_imgsize=prisoner_imgsize,
+        init_data=s._data,
         default=default
     )
 
@@ -103,13 +106,17 @@ def _parse_component_value(component_value: list)-> tuple:
 # Add some test code to play with the component while it's in development.
 # During development, we can run this just as we would any other Streamlit
 # app: `$ streamlit run my_component/__init__.py`
-if not _RELEASE:
-    import streamlit as st
+if __name__ == "__main__":
+    if not _RELEASE:
+        # test run of the local app
+        # to do this, we add this component to the pythonpath, so that the app uses this local package
+        # we also add the app directory and call its main function here
+        import os
+        import sys
 
-    # Create an instance of our component with a constant `name` arg, and
-    # print its output value.
-    #ret = st_doubutsushogi(piecename="emoji1")
-    ret = st_doubutsushogi()
-    
-    print(ret)
-
+        componentdir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../"))
+        appdir = os.path.join(componentdir, "app")
+        sys.path.insert(0, appdir)
+        sys.path.insert(0, componentdir)
+        import streamlit_app
+        streamlit_app.main()
