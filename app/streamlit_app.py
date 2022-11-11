@@ -10,6 +10,8 @@ from doubutsushogi import evaluate_states, initial_state
 from study import study_app
 from play import play_app
 
+__version__ = "0.0.2"
+
 def main():
     st.set_page_config(page_title="Doubutsu Shogi Master", layout="wide")
 
@@ -20,6 +22,11 @@ def main():
     
     with st.sidebar:
         piecename = st.selectbox("Piece type", ["emoji1", "emoji2", "emoji3", "hiragana"])
+        st.markdown("---")
+        st.markdown("""
+        Version {} / 
+        <a href="https://github.com/kota7/streamlit-doubutsushogi"  target="_blank" rel="noopener noreferrer">streamlit-doubutsushogi</a>
+        """.format(__version__), unsafe_allow_html=True)
     
     tab1, tab2 = st.tabs(["Study", "Play"])
     with tab1:
