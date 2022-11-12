@@ -521,7 +521,7 @@ class DoubutsuShogi extends StreamlitComponentBase<State> {
     // apply the turn information to the visual
     const turn1 = this._getTurnIndicator(1)
     const turn2 = this._getTurnIndicator(2)
-    if (this._gameStatus() != 0) {
+    if (this._gameStatus() !== 0) {
       // game is over, no player is to play
       turn1?.classList.remove("next-mover")
       turn2?.classList.remove("next-mover")
