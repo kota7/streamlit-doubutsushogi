@@ -158,24 +158,16 @@ class DoubutsuShogi extends StreamlitComponentBase<State> {
     )
   }
 
+  // Access method to the html elements
+  private _getPrisoner = (index: number) => {
+    return document.getElementById(`prisoner${index}`)
+  }
+  private _getImage = (index: number): HTMLImageElement | undefined => { 
+    return document.getElementById(`img${index}`) as HTMLImageElement;
+  }
 
-  private _applyCurrentState = (): void => {
-    // update the visuals to the current state
-    // Boards
-    Array.from(Array(12).keys()).forEach( (index: number) => {
-      const cell = this._getCell(index);
-      const piece = Math.abs(this.state.board[index])
-      const player1 = (this.state.board[index] > 0)
-
-      this._updateCell(index, piece, player1)
-    })
-    // Prisoners
-    Array.from(Array(6).keys()).forEach( (index: number) => {
-      const num = document.getElementById(`prisoner${index}`)
-      if (num != null) { num.innerText = String(this.state.prisoners[index]) }
-    })
-    // Turn indicator
-    // TBA
+  private _getCell = (index: number): HTMLImageElement | undefined => { 
+    return document.getElementById(`cell${index}`) as HTMLImageElement;
   }
 
   private flipBoard = (): void => {
@@ -194,13 +186,19 @@ class DoubutsuShogi extends StreamlitComponentBase<State> {
     Streamlit.setComponentValue(ret)    
   }
 
-  private _getImage = (index: number): HTMLImageElement | undefined => { 
-    return document.getElementById(`img${index}`) as HTMLImageElement;
-  }
-
-  private _getCell = (index: number): HTMLImageElement | undefined => { 
-    return document.getElementById(`cell${index}`) as HTMLImageElement;
-  }
+  private _applyCurrentState = (): void => {
+    // update the visuals to the current state
+    // Boards
+    Array.from(Array(12).keys()).forEach( (index: number) => {
+      this._applyCell(index)
+    })
+    // Prisoners
+    Array.from(Array(6).keys()).forEach( (index: number) => {
+      this._applyPrisoner(index)
+    })
+    // Turn indicator
+    // TBA
+  }  
 
   private pieceClicked = (index: number): void => {
     //console.log("state before click event at ", index, this.state)
@@ -356,26 +354,37 @@ class DoubutsuShogi extends StreamlitComponentBase<State> {
     return false  
   }
 
-  private _updateCell = (index: number, piece: number, player1: boolean): void => {
-    this.state.board[index] = player1 ? piece : -piece  // update the state
+  private _applyCell = (index: number): void => {
+    const piece = Math.abs(this.state.board[index])
+    const opponent = (this.state.board[index] < 0)
     const img = this._getImage(index)
     if (img != null) {
       img.src = this.state.images[piece]
-      if (piece !== 0) {
-        if (player1) { img.classList.remove("opponent") } else { img.classList.add("opponent") }
-      }
+      if (opponent) { img.classList.add("opponent") } else { img.classList.remove("opponent") }
     }
   }
 
-  private _updatePrisoner = (index: number, add: boolean): void => {
-    // index must be 0 to 5, corresponding to the index of state.prisoners
-    if (add) {
-      this.state.prisoners[index]++  // gained one piece
-    } else {
-      this.state.prisoners[index]--  // used one piece, decrease by one
-    }
-    const num = document.getElementById(`prisoner${index}`)
+  private _updateCell = (index: number, piece: number, player1: boolean): void => {
+    // change the visual of the cell of the given index to the given piece of the given player
+    this.state.board[index] = player1 ? piece : -piece  // update the state
+    this._applyCell(index) // update the visual
+  }
+
+  private _applyPrisoner = (index: number): void => {
+    const num = this._getPrisoner(index)
     if (num != null) { num.innerText = String(this.state.prisoners[index]) }
+  }
+
+  private _updatePrisoner = (index: number, value: number): void => {
+    // change the visual of the prisoner to the given number
+    this.state.prisoners[index] = value
+    this._applyPrisoner(index)
+  }
+
+  private _incrementPrisoner = (index: number, add: boolean): void => {
+    // index must be 0 to 5, corresponding to the index of state.prisoners
+    const value = this.state.prisoners[index] + (add ?  + 1 : -1)
+    this._updatePrisoner(index, value)
   }
 
   private _movePiece = (index_from: number, index_to: number): void => {
@@ -388,7 +397,7 @@ class DoubutsuShogi extends StreamlitComponentBase<State> {
     if (index_from > 11) {
       // using a prisoner
       // change the state and apply to the visual
-      this._updatePrisoner(index_from - 12, false)
+      this._incrementPrisoner(index_from - 12, false)
       // place the piece
       // change the state and apply to the visual
       //const piece = ((index_from - 12) % 3) + 1
@@ -401,7 +410,7 @@ class DoubutsuShogi extends StreamlitComponentBase<State> {
         // to get the piece index, we first subtract one from piece and take mod(3)
         // this way, (1,4)-> 0, 2-> 1, 3-> 2
         // and add 3 if opponent turn
-        this._updatePrisoner((piece_to - 1) % 3 + (this.state.isTurn1 ? 0 : 3), true)
+        this._incrementPrisoner((piece_to - 1) % 3 + (this.state.isTurn1 ? 0 : 3), true)
       }
       //const piece = Math.abs(this.state.board[index_from])
       const promoted = this.state.isTurn1 ? (index_to < 3) : (index_to > 8)
