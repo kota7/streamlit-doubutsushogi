@@ -75,7 +75,7 @@ def study_app(prefix="study", piecename="emoji1"):
 
     left, right = st.columns([5, 7])
     with right:
-        state_text = st.text_input("Go to: ", placeholder="klz.h..H.ZLK0000001")
+        state_text = st.text_input("Go to: ", placeholder="klz.h..H.ZLK0000001", disabled=True, help="This features is under development"])
 
     with left:
         state, status, action = st_doubutsushogi(state=_parse_state_text(state_text), piecename=piecename, cellsize="100px", piece_imgsize="90", prisoner_imgsize="60px")
