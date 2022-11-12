@@ -26,7 +26,7 @@ except:
 logger.info("App ver '%s', lib ver '%s', component ver '%s'", _app_version, _lib_version, _component_version)
 
 def main():
-    st.set_page_config(page_title="Doubutsu Shogi Master", layout="wide", initial_sidebar_state="collapsed")
+    st.set_page_config(page_title="Doubutsu Shogi Master", layout="wide", initial_sidebar_state="auto")
 
     with st.spinner("Setting up the database..."):
         # evaluate function automatically download the dbfile if not exists
