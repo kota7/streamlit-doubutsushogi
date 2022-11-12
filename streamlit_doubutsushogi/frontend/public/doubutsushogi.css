@@ -110,6 +110,17 @@
   user-select: none;
 }
 
+.control-button:active{
+  padding-top: 3px;
+  padding-bottom: 2px;
+  /* border:1px solid #334c66; */
+  background-color: #e5e5e5; 
+  /* color:#e0ebf5; */
+  -webkit-box-shadow:inset 0px 0px 8px #334c66;
+  -moz-box-shadow:inset 0px 0px 2px #3a6da0;
+  box-shadow:inset 0px 0px 2px #3a6da0;
+}
+
 .inactive {
   filter: opacity(40%);
 }
