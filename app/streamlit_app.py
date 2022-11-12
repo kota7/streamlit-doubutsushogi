@@ -13,7 +13,7 @@ from play import play_app
 __version__ = "0.0.5"
 
 def main():
-    st.set_page_config(page_title="Doubutsu Shogi Master", layout="wide")
+    st.set_page_config(page_title="Doubutsu Shogi Master", layout="wide", initial_sidebar_state="collapsed")
 
     with st.spinner("Setting up the database..."):
         # evaluate function automatically download the dbfile if not exists
