@@ -10,7 +10,7 @@ from doubutsushogi import evaluate_states, initial_state
 from study import study_app
 from play import play_app
 
-__version__ = "0.0.3"
+__version__ = "0.0.4"
 
 def main():
     st.set_page_config(page_title="Doubutsu Shogi Master", layout="wide")
