@@ -6,13 +6,13 @@
 .prisoner-value {
   vertical-align: bottom;
 }
-
+/*
 .prisoner-piece {
-  filter: brightness(95%);
+  filter: brightness(100%);
 }
-
+*/
 .cell {
-  background-color: #d1edf2;
+  background-color: #ddf5dd;
   border: 1px #777777 dashed;
   text-align: center;
   vertical-align: middle;
@@ -26,11 +26,12 @@
 .board {
   table-layout: fixed;
 }
-
+/*
 .piece {
-  filter: brightness(95%);
+  filter: brightness(100%); 
   /* box-shadow: 2px 2px 2px #464646, -2px -2px 2px #464646; }; */
 }
+*/
 
 /* Firefox old*/
 @-moz-keyframes blink {
@@ -78,3 +79,25 @@
   filter: brightness(80%);
 }
 */
+
+.control-button {
+  justify-content: center;
+  align-content: center;
+  display: inline-block;
+  width: 40px;
+  height: 40px;
+  border: 3px #222222 solid;
+  border-radius: 25px; 
+  text-align: center;
+  font-size: 20px;
+  font-style: bold;
+  cursor: default;
+}
+
+.control {
+  padding: 3px;
+}
+
+.controls {
+  cursor: default;
+}

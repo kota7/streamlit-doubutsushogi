@@ -142,8 +142,56 @@ class DoubutsuShogi extends StreamlitComponentBase<State> {
       </tr>
       </tbody></table>
 
+      <table><tbody>
+      <tr><td>&nbsp;</td></tr>
+      <tr className="controls">
+        <td className="control"><span id="to-start" className="control-button">&lt;&lt;</span></td>
+        <td className="control"><span id="to-prev" className="control-button">&lt;</span></td>
+        <td>&nbsp;&nbsp;&nbsp;</td>
+        <td className="control"><span id="to-next" className="control-button">&gt;</span></td>
+        <td className="control"><span id="to-end" className="control-button">&gt;&gt;</span></td>
+        <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+        <td className="control"><span id="board-flip" className="control-button" onClick={ () => this.flipBoard() }>&#8645;</span></td>        
+      </tr>
+      </tbody></table>
       </div>
     )
+  }
+
+
+  private _applyCurrentState = (): void => {
+    // update the visuals to the current state
+    // Boards
+    Array.from(Array(12).keys()).forEach( (index: number) => {
+      const cell = this._getCell(index);
+      const piece = Math.abs(this.state.board[index])
+      const player1 = (this.state.board[index] > 0)
+
+      this._updateCell(index, piece, player1)
+    })
+    // Prisoners
+    Array.from(Array(6).keys()).forEach( (index: number) => {
+      const num = document.getElementById(`prisoner${index}`)
+      if (num != null) { num.innerText = String(this.state.prisoners[index]) }
+    })
+    // Turn indicator
+    // TBA
+  }
+
+  private flipBoard = (): void => {
+    // update the state first
+    const prev_state = this.state
+    this.state.board = prev_state.board.reverse().map( (v: number): number => { return -v })
+    this.state.prisoners = prev_state.prisoners.slice(3, 6).concat(prev_state.prisoners.slice(0, 3))
+    this.state.isTurn1 = !prev_state.isTurn1
+    
+    // update the visual
+    this._applyCurrentState()
+
+    // report to the python side
+    const ret = this.state.board.concat(this.state.prisoners).concat(
+      this.state.isTurn1 ? 1 : 2, this._gameStatus())
+    Streamlit.setComponentValue(ret)    
   }
 
   private _getImage = (index: number): HTMLImageElement | undefined => { 
@@ -202,7 +250,7 @@ class DoubutsuShogi extends StreamlitComponentBase<State> {
         cell?.classList.remove("highlighted")
       }
     })
-}
+  }
 
   private _unselect = (): void => {
     // unselect the selected piece
@@ -224,7 +272,6 @@ class DoubutsuShogi extends StreamlitComponentBase<State> {
   private _sameRow(index1: number, index2: number): boolean {
     return Math.floor(index1/3) === Math.floor(index2/3)
   }
-
 
   private _canMove = (index_from: number, index_to: number): boolean => {
     //if ( this._gameStatus() !== 0 ) { return false; }  // game is over, cannot move any piece
@@ -393,27 +440,6 @@ class DoubutsuShogi extends StreamlitComponentBase<State> {
     }
 
     return 0
-  }
-
-  /*
-  private pieceClicked = (idx: number) => {
-    const result = () => {
-      const cell = document.getElementById(`img${idx}`) as HTMLImageElement;
-      if (cell != null) { cell.src=require("./pieces/emoji1/hiyoko.png"); }
-    }
-    return result;
-  }
-  */
-
-
-  /** Click handler for our "Click Me!" button. */
-  private onClicked = (): void => {
-    // Increment state.numClicks, and pass the new value back to
-    // Streamlit via `Streamlit.setComponentValue`.
-    this.setState(
-      //prevState => ({ numClicks: prevState.numClicks + 1 }),
-      () => Streamlit.setComponentValue(100)
-    )
   }
 
   /** Focus handler for our "Click Me!" button. */
