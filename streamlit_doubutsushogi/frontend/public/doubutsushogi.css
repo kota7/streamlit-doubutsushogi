@@ -26,6 +26,13 @@
 .board {
   table-layout: fixed;
 }
+
+/*
+.doubutsushogi-ui {
+  overflow: hidden;
+}
+*/
+
 /*
 .piece {
   filter: brightness(100%); 
@@ -92,6 +99,10 @@
   font-size: 20px;
   font-style: bold;
   cursor: default;
+}
+
+.inactive {
+  filter: opacity(40%);
 }
 
 .control {

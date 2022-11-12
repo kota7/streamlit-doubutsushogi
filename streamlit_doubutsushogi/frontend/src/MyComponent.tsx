@@ -7,12 +7,14 @@ import React, { ReactNode } from "react"
 
 interface State {
   //numClicks: number
-  board: number[]        // board status, length 12
-  prisoners: number[]    // prisoner counts, length 6
-  isTurn1: boolean       // indicates that the next mover is the player 1 (bottom to top)
-  selectedIndex: number  // index of selected cell, negative indicates no cell is selected
-  images: string[]       // piece images, length 6 (include empty)
-  initData: number[]     // initial state data, length 19
+  board: number[]         // board status, length 12
+  prisoners: number[]     // prisoner counts, length 6
+  isTurn1: boolean        // indicates that the next mover is the player 1 (bottom to top)
+  selectedIndex: number   // index of selected cell, negative indicates no cell is selected
+  images: string[]        // piece images, length 6 (include empty)
+  initData: number[]      // initial state data, length 19
+  prevData: number[][]    // previous data list, older the first, format in: board + prisoners + [turn]
+  nextData: number[][]    // next data list, newer the first, the same format as prevData
   isFocused: boolean
 }
 
@@ -28,24 +30,21 @@ class DoubutsuShogi extends StreamlitComponentBase<State> {
     selectedIndex: -1,
     images: ["", "", "", "", ""],
     initData: [-3, -5, -2, 0, -1, 0, 0, 1, 0, 2, 5, 3, 0, 0, 0, 0, 0, 0, 1],
+    prevData: [] as number[][],
+    nextData: [] as number[][],
     isFocused: false
     //,numClicks: 0    
   }
 
   componentDidMount(): void {
-    console.log("start componentDidMount")
+    //console.log("start componentDidMount")
     this.state.board = this.state.initData.slice(0, 12)
     this.state.prisoners = this.state.initData.slice(12, 18)
     this.state.isTurn1 = this.state.initData[18]===1
 
     // This is copied from the source of StreamlitComponentBase
     // By this, we tell Streamlit that our height has changed.
-    Streamlit.setFrameHeight();  
-    /*
-    const ret = this.state.board.concat(this.state.prisoners).concat(
-      this.state.isTurn1 ? 1 : 2, this._gameStatus())
-    Streamlit.setComponentValue(ret)
-    */
+    Streamlit.setFrameHeight();
   }
 
   public render = (): ReactNode => {
@@ -58,8 +57,8 @@ class DoubutsuShogi extends StreamlitComponentBase<State> {
     const piece_imgsize = this.props.args["piece_imgsize"]
     const init_data = this.props.args["init_data"]
     this.state.initData = init_data
-    console.log("init_data given", init_data)
-    console.log(this.state.initData)
+    //console.log("init_data given", init_data)
+    //console.log(this.state.initData)
 
     // Streamlit sends us a theme object via props that we can use to ensure
     // that our component has visuals that match the active theme in a
@@ -78,15 +77,9 @@ class DoubutsuShogi extends StreamlitComponentBase<State> {
       style.border = borderStyling
       style.outline = borderStyling
     }
-    /*
-    if (data.length === 19) {
-      this.state.board = data.slice(0, 12)
-      this.state.prisoners = data.slice(12, 18)
-      this.state.isTurn1 = (data[18] === 1)
-    }
-    */
     
-    console.log("loading piece images")
+    //console.log("loading piece images")
+    // todo: ideally we want to load this only once
     const empty  = require(`./pieces/empty.png`)
     const hiyoko = require(`./pieces/${piecename}/hiyoko.png`)
     const zou    = require(`./pieces/${piecename}/zou.png`)
@@ -101,7 +94,7 @@ class DoubutsuShogi extends StreamlitComponentBase<State> {
     const opps = this.state.board.map( (i: number) => i < 0 ? "piece opponent" : i > 0 ? "piece own" : "piece empty")
 
     return (
-      <div>
+      <div className="doubutsushogi-ui">
 
       <table><tbody>
       <tr>
@@ -145,13 +138,13 @@ class DoubutsuShogi extends StreamlitComponentBase<State> {
       <table><tbody>
       <tr><td>&nbsp;</td></tr>
       <tr className="controls">
-        <td className="control"><span id="to-start" className="control-button">&lt;&lt;</span></td>
-        <td className="control"><span id="to-prev" className="control-button">&lt;</span></td>
+        <td className="control"><span id="to-start" className="control-button inactive" onClick={this.toStart}>&lt;&lt;</span></td>
+        <td className="control"><span id="to-prev" className="control-button inactive" onClick={this.toPrev}>&lt;</span></td>
         <td>&nbsp;&nbsp;&nbsp;</td>
-        <td className="control"><span id="to-next" className="control-button">&gt;</span></td>
-        <td className="control"><span id="to-end" className="control-button">&gt;&gt;</span></td>
+        <td className="control"><span id="to-next" className="control-button inactive" onClick={this.toNext}>&gt;</span></td>
+        <td className="control"><span id="to-last" className="control-button inactive" onClick={this.toLast}>&gt;&gt;</span></td>
         <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
-        <td className="control"><span id="board-flip" className="control-button" onClick={ () => this.flipBoard() }>&#8645;</span></td>        
+        <td className="control"><span id="board-flip" className="control-button" onClick={this.flipBoard}>&#8645;</span></td>        
       </tr>
       </tbody></table>
       </div>
@@ -170,20 +163,149 @@ class DoubutsuShogi extends StreamlitComponentBase<State> {
     return document.getElementById(`cell${index}`) as HTMLImageElement;
   }
 
+
+  private _getPrevButton  = () => { return document.getElementById("to-prev") }
+  private _getStartButton = () => { return document.getElementById("to-start") }
+  private _getNextButton  = () => { return document.getElementById("to-next") }
+  private _getLastButton  = () => { return document.getElementById("to-last") }
+  
+  
+  //
+
+  // Prev and Next funcationality
+  private toPrev = (): void => {
+    if (this.state.prevData.length === 0) { return }  // nothing to do if there is no previous history
+    const data = this.state.prevData.pop()
+    if (data == null) { return }  // exit if prev data is null, this should not happen, but just in case
+
+    // add current data to the next
+    this.state.nextData.push(this._currentData())
+    this._updateButtonState() // we need to change active/inactive status of buttons
+
+    // set the prev data to the board state
+    this._setData(data)
+    // report to the python side
+    this._reportCurrentStatus()
+  }
+
+  private toNext = (): void => {
+    if (this.state.nextData.length === 0) { return }  // nothing to do if there is no leading history
+    const data = this.state.nextData.pop()
+    if (data == null) { return }  // exit if next data is null, this should not happen, but just in case
+
+    // add current data to the next
+    this.state.prevData.push(this._currentData())
+    this._updateButtonState() // we need to change active/inactive status of buttons
+
+    // set the prev data to the board state
+    this._setData(data)
+    // report to the python side
+    this._reportCurrentStatus()
+  }
+
+  private toStart = (): void => {
+    if (this.state.prevData.length === 0) { return }  // nothing to do if there is no previous history
+    const data = this.state.prevData.shift()  // get the first element, i.e. the oldest board state
+    if (data == null) { return }  // exit if prev data is null, this should not happen, but just in case
+    
+    // move all history to the next
+    // note that we need to reverse prevData because the sort order is the opposite
+    this.state.nextData.push(this._currentData(), ...this.state.prevData.reverse())
+    this.state.prevData.length = 0  // empty prev because we are at the beginning
+    this._updateButtonState() // we need to change active/inactive status of buttons
+
+    // set the prev data to the board state
+    this._setData(data)
+    // report to the python side
+    this._reportCurrentStatus()
+  }
+
+  private toLast = (): void => {
+    if (this.state.nextData.length === 0) { return }  // nothing to do if there is no leading history
+    const data = this.state.nextData.shift()  // get the first element, i.e. the newest board state
+    if (data == null) { return }  // exit if next data is null, this should not happen, but just in case
+    
+    // move all history to the prev
+    // note that we need to reverse nextData because the sort order is the opposite
+    this.state.prevData.push(this._currentData(), ...this.state.nextData.reverse())
+    this.state.nextData.length = 0  // empty next because we are at the end
+    this._updateButtonState() // we need to change active/inactive status of buttons
+
+    // set the prev data to the board state
+    this._setData(data)
+    // report to the python side
+    this._reportCurrentStatus()
+  }
+
+  private _setData = (data: number[]): void => {
+    // update state
+    this.state.board = data.slice(0, 12)
+    this.state.prisoners = data.slice(12, 18)
+    this.state.isTurn1 = (data[18] === 1)
+    // update visual
+    this._applyCurrentState()    
+  }
+
+  private _currentData = (): number[] => {
+    return this.state.board.concat(this.state.prisoners).concat(
+      this.state.isTurn1 ? 1 : 2
+    )
+  }
+
+  private _updateButtonState = (): void => {
+    const prev_button = this._getPrevButton()
+    const start_button = this._getStartButton()
+    //console.log(prev_button, start_button)
+    if (this.state.prevData.length > 0) {
+      prev_button?.classList.remove("inactive")
+      start_button?.classList.remove("inactive")
+    } else {
+      prev_button?.classList.add("inactive")
+      start_button?.classList.add("inactive")
+    }
+
+    const next_button = this._getNextButton()
+    const last_button = this._getLastButton()
+    if (this.state.nextData.length > 0) {
+      next_button?.classList.remove("inactive")
+      last_button?.classList.remove("inactive")
+    } else {
+      next_button?.classList.add("inactive")
+      last_button?.classList.add("inactive")
+    }
+  }
+
+
+  // Flip board functionality
   private flipBoard = (): void => {
     // update the state first
     const prev_state = this.state
     this.state.board = prev_state.board.reverse().map( (v: number): number => { return -v })
     this.state.prisoners = prev_state.prisoners.slice(3, 6).concat(prev_state.prisoners.slice(0, 3))
     this.state.isTurn1 = !prev_state.isTurn1
+    // we also flip the history data
+    this.state.prevData = this.state.prevData.map(this._flipData)
+    this.state.nextData = this.state.nextData.map(this._flipData)
     
     // update the visual
     this._applyCurrentState()
 
     // report to the python side
+    this._reportCurrentStatus()
+  }
+
+  private _reportCurrentStatus = (): void => {
+    // report current game state to python, with no action
     const ret = this.state.board.concat(this.state.prisoners).concat(
       this.state.isTurn1 ? 1 : 2, this._gameStatus())
-    Streamlit.setComponentValue(ret)    
+    Streamlit.setComponentValue(ret)
+  }
+  private _flipData = (data: number[]): number[] => {
+    // flip a single game data
+    return data.slice(0, 12).reverse().map( (v: number): number => { return -v })
+      .concat(data.slice(15, 18))
+      .concat(data.slice(12, 15))
+      .concat(data[18]===1 ? 2 : 1) 
   }
 
   private _applyCurrentState = (): void => {
@@ -198,8 +320,10 @@ class DoubutsuShogi extends StreamlitComponentBase<State> {
     })
     // Turn indicator
     // TBA
-  }  
+  }
+  //
 
+  // Piece click functionality
   private pieceClicked = (index: number): void => {
     //console.log("state before click event at ", index, this.state)
     if (this._gameStatus() !== 0) { return }  // cannot move anything when the game is over
@@ -212,7 +336,13 @@ class DoubutsuShogi extends StreamlitComponentBase<State> {
       // so we move the piece here if possible
       // otherwise current selection is removed
       if (this._canMove(this.state.selectedIndex, index)) {
+        // store current state to the prev storage
+        this.state.prevData.push(this._currentData())
         this._movePiece(this.state.selectedIndex, index);
+        // delete the next data because we have branched out
+        // we are currently support only one line of history, no branching
+        this.state.nextData.length = 0
+        this._updateButtonState() // we need to change active/inactive status of buttons
       } else {
         this._unselect();
       }
@@ -355,6 +485,7 @@ class DoubutsuShogi extends StreamlitComponentBase<State> {
   }
 
   private _applyCell = (index: number): void => {
+    // apply the cell value to the visual
     const piece = Math.abs(this.state.board[index])
     const opponent = (this.state.board[index] < 0)
     const img = this._getImage(index)
@@ -371,6 +502,7 @@ class DoubutsuShogi extends StreamlitComponentBase<State> {
   }
 
   private _applyPrisoner = (index: number): void => {
+    // apply the prisoner value to the visual
     const num = this._getPrisoner(index)
     if (num != null) { num.innerText = String(this.state.prisoners[index]) }
   }
@@ -460,7 +592,7 @@ class DoubutsuShogi extends StreamlitComponentBase<State> {
   private _onBlur = (): void => {
     this.setState({ isFocused: false })
   }
-  
+
 }
 
 // "withStreamlitConnection" is a wrapper function. It bootstraps the
