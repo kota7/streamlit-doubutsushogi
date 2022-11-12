@@ -8,7 +8,7 @@ with open(readmefile) as f:
 
 setuptools.setup(
     name="streamlit-doubutsushogi",
-    version="0.0.3",
+    version="0.0.4",
     author='Kota Mori', 
     author_email='kmori05@gmail.com',
     description="A streamlit custom component for doubutsushogi (animal chess) game",
