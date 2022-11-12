@@ -132,3 +132,14 @@
 .controls {
   cursor: default;
 }
+
+
+.turn-indicator {
+  font-size: 30px;
+  text-align: left;
+  filter: opacity(25%);
+}
+
+.next-mover {
+  filter: opacity(100%);
+}

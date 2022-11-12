@@ -50,7 +50,7 @@ else:
 # `declare_component` and call it done. The wrapper allows us to customize
 # our component's API: we can pre-process its input args, post-process its
 # output value, and add a docstring for users.
-def st_doubutsushogi(state=None, piecename="emoji1", cellsize="90px", piece_imgsize="80px", prisoner_imgsize="40px"):
+def st_doubutsushogi(state=None, piecename="emoji1", cellsize="100px", piece_imgsize="90", prisoner_imgsize="60px"):
     """
     Create a new instance of st_doubutsushogi, a game UI.
 
