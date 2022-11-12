@@ -5,5 +5,5 @@ logger = getLogger(__name__)
 
 import streamlit as st
 
-def play_app(prefix="play"):
+def play_app(piecename="emoji1"):
     st.write("TBA")
