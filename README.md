@@ -63,6 +63,7 @@ streamlit run app/streamlit_app.py
 # 1. build javascript sources
 cd streamlit_doubutsushogi/frontend && npm run build && cd ../../
 # 2. make python package wheel
+rm -r build dist *.egg-info   # only for the second time or later
 python3 setup.py sdist bdist_wheel
 # 3. upload to PyPI
 twine upload --repository pypi dist/*
