@@ -41,7 +41,7 @@ class DoubutsuShogi extends StreamlitComponentBase<State> {
     this.state.board = this.state.initData.slice(0, 12)
     this.state.prisoners = this.state.initData.slice(12, 18)
     this.state.isTurn1 = this.state.initData[18]===1
-
+    this._applyTurn()
     // This is copied from the source of StreamlitComponentBase
     // By this, we tell Streamlit that our height has changed.
     Streamlit.setFrameHeight();
@@ -101,6 +101,8 @@ class DoubutsuShogi extends StreamlitComponentBase<State> {
         <td className="prisoner-cell"><img id="img15" className="prisoner-piece" alt="hiyoko" src={hiyoko} width={prisoner_imgsize} onClick={ (e)=>this.pieceClicked(15) } /><span className="prisoner-value" id="prisoner3">{this.state.prisoners[3]}</span>&nbsp;</td>
         <td className="prisoner-cell"><img id="img16" className="prisoner-piece" alt="zou"    src={zou}    width={prisoner_imgsize} onClick={ (e)=>this.pieceClicked(16) } /><span className="prisoner-value" id="prisoner4">{this.state.prisoners[4]}</span>&nbsp;</td>
         <td className="prisoner-cell"><img id="img17" className="prisoner-piece" alt="kirin"  src={kirin}  width={prisoner_imgsize} onClick={ (e)=>this.pieceClicked(17) } /><span className="prisoner-value" id="prisoner5">{this.state.prisoners[5]}</span>&nbsp;</td>
+        <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+        <td className="turn-indicator-cell"><span id="turn-indicator2" className="turn-indicator">&#9663;</span></td>
       </tr>
       </tbody></table>
 
@@ -132,6 +134,8 @@ class DoubutsuShogi extends StreamlitComponentBase<State> {
         <td className="prisoner-cell"><img id="img12" className="prisoner-piece" alt="hiyoko" src={hiyoko} width={prisoner_imgsize} onClick={ (e)=>this.pieceClicked(12) } /><span className="prisoner-value" id="prisoner0">{this.state.prisoners[0]}</span>&nbsp;</td>
         <td className="prisoner-cell"><img id="img13" className="prisoner-piece" alt="zou"    src={zou}    width={prisoner_imgsize} onClick={ (e)=>this.pieceClicked(13) } /><span className="prisoner-value" id="prisoner1">{this.state.prisoners[1]}</span>&nbsp;</td>
         <td className="prisoner-cell"><img id="img14" className="prisoner-piece" alt="kirin"  src={kirin}  width={prisoner_imgsize} onClick={ (e)=>this.pieceClicked(14) } /><span className="prisoner-value" id="prisoner2">{this.state.prisoners[2]}</span>&nbsp;</td>
+        <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+        <td className="turn-indicator-cell"><span id="turn-indicator1" className="turn-indicator">&#9650;</span></td>
       </tr>
       </tbody></table>
 
@@ -143,7 +147,7 @@ class DoubutsuShogi extends StreamlitComponentBase<State> {
         <td>&nbsp;&nbsp;&nbsp;</td>
         <td className="control"><span id="to-next" className="control-button inactive" onClick={this.toNext}>&gt;</span></td>
         <td className="control"><span id="to-last" className="control-button inactive" onClick={this.toLast}>&gt;&gt;</span></td>
-        <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+        <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
         <td className="control"><span id="board-flip" className="control-button" onClick={this.flipBoard}>&#8645;</span></td>        
       </tr>
       </tbody></table>
@@ -163,13 +167,14 @@ class DoubutsuShogi extends StreamlitComponentBase<State> {
     return document.getElementById(`cell${index}`) as HTMLImageElement;
   }
 
-
   private _getPrevButton  = () => { return document.getElementById("to-prev") }
   private _getStartButton = () => { return document.getElementById("to-start") }
   private _getNextButton  = () => { return document.getElementById("to-next") }
   private _getLastButton  = () => { return document.getElementById("to-last") }
   
-  
+  private _getTurnIndicator = (index: number) => {
+    return document.getElementById(`turn-indicator${index}`)
+  }  
   //
 
   // Prev and Next funcationality
@@ -275,7 +280,6 @@ class DoubutsuShogi extends StreamlitComponentBase<State> {
     }
   }
 
-
   // Flip board functionality
   private flipBoard = (): void => {
     // update the state first
@@ -319,7 +323,7 @@ class DoubutsuShogi extends StreamlitComponentBase<State> {
       this._applyPrisoner(index)
     })
     // Turn indicator
-    // TBA
+    this._applyTurn()
   }
   //
 
@@ -513,6 +517,23 @@ class DoubutsuShogi extends StreamlitComponentBase<State> {
     this._applyPrisoner(index)
   }
 
+  private _applyTurn = (): void => {
+    // apply the turn information to the visual
+    const turn1 = this._getTurnIndicator(1)
+    const turn2 = this._getTurnIndicator(2)
+    if (this._gameStatus() != 0) {
+      // game is over, no player is to play
+      turn1?.classList.remove("next-mover")
+      turn2?.classList.remove("next-mover")
+    } else if (this.state.isTurn1) {
+      turn1?.classList.add("next-mover")
+      turn2?.classList.remove("next-mover")
+    } else {
+      turn1?.classList.remove("next-mover")
+      turn2?.classList.add("next-mover")
+    }
+  }
+
   private _incrementPrisoner = (index: number, add: boolean): void => {
     // index must be 0 to 5, corresponding to the index of state.prisoners
     const value = this.state.prisoners[index] + (add ?  + 1 : -1)
@@ -547,11 +568,12 @@ class DoubutsuShogi extends StreamlitComponentBase<State> {
       //const piece = Math.abs(this.state.board[index_from])
       const promoted = this.state.isTurn1 ? (index_to < 3) : (index_to > 8)
       this._updateCell(index_to, (piece === 1 && promoted) ? 4 : piece, this.state.isTurn1)  // update the target cell
-      this._updateCell(index_from, 0, false)                      // update the source cell to empty
+      this._updateCell(index_from, 0, false)                                                 // update the source cell to empty
     }
 
     this._unselect()  // after move, we remove the selection
     this.state.isTurn1 = !this.state.isTurn1
+    this._applyTurn()
 
     // return component information to the python side
     // return an array of the resulted state (length 19)
