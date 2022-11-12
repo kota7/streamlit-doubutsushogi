@@ -53,3 +53,21 @@ To run the app on the computer locally, run the following:
 ```shell
 streamlit run app/streamlit_app.py
 ```
+
+
+## Tips
+
+### How to upload this app to PyPI
+
+```shell
+# 1. build javascript sources
+cd streamlit_doubutsushogi/frontend && npm run build && cd ../../
+# 2. make python package wheel
+python3 setup.py sdist bdist_wheel
+# 3. upload to PyPI
+twine upload --repository pypi dist/*
+```
+
+1. Build the javascript application
+1. Make Python package wheel
+1. Upload to PyPI
