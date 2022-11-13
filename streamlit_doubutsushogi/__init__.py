@@ -3,6 +3,7 @@
 import os
 from collections import namedtuple
 from logging import getLogger
+from turtle import st
 import streamlit.components.v1 as components
 from doubutsushogi.game import State, Action, PRISONER_INDEX
 logger = getLogger(__name__)
@@ -122,3 +123,7 @@ if __name__ == "__main__":
         sys.path.insert(0, componentdir)
         import streamlit_app
         streamlit_app.main()
+        #st_doubutsushogi(key=1)
+        #st_doubutsushogi(key=2)
+
+
