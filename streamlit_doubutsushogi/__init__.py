@@ -3,11 +3,12 @@
 import os
 from collections import namedtuple
 from logging import getLogger
+from turtle import st
 import streamlit.components.v1 as components
 from doubutsushogi.game import State, Action, PRISONER_INDEX
 logger = getLogger(__name__)
 
-__version__ = "0.0.9"
+__version__ = "0.0.10"
 
 # Create a _RELEASE constant. We'll set this to False while we're developing
 # the component, and True when we're ready to package and distribute it.
@@ -51,7 +52,7 @@ else:
 # `declare_component` and call it done. The wrapper allows us to customize
 # our component's API: we can pre-process its input args, post-process its
 # output value, and add a docstring for users.
-def st_doubutsushogi(state=None, piecename="emoji1", cellsize="100px", piece_imgsize="90", prisoner_imgsize="60px"):
+def st_doubutsushogi(state=None, piecename="emoji1", key=None, cellsize="100px", piece_imgsize="90", prisoner_imgsize="60px"):
     """
     Create a new instance of st_doubutsushogi, a game UI.
 
@@ -76,6 +77,7 @@ def st_doubutsushogi(state=None, piecename="emoji1", cellsize="100px", piece_img
     assert piecename in ("emoji1", "emoji2", "emoji3", "hiragana")
     component_value = _component_func(
         piecename=piecename,
+        key=key,
         cellsize=cellsize,
         piece_imgsize=piece_imgsize,
         prisoner_imgsize=prisoner_imgsize,
@@ -121,3 +123,7 @@ if __name__ == "__main__":
         sys.path.insert(0, componentdir)
         import streamlit_app
         streamlit_app.main()
+        #st_doubutsushogi(key=1)
+        #st_doubutsushogi(key=2)
+
+
