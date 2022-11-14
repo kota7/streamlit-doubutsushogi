@@ -44,6 +44,7 @@ class DoubutsuShogi extends StreamlitComponentBase<State> {
     this._applyTurn()
     // This is copied from the source of StreamlitComponentBase
     // By this, we tell Streamlit that our height has changed.
+    // https://github.com/streamlit/streamlit/blob/develop/component-lib/src/StreamlitReact.tsx
     Streamlit.setFrameHeight();
   }
 
