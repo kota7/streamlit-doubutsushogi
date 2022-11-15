@@ -89,5 +89,5 @@ def study_app(prefix="study", piecename="emoji1"):
 
     with right:
         _show_status_summary(state)
-        if state.status == 0:   # only show the table if the game is not over yet
+        if state is not None and state.status == 0:   # only show the table if the game is not over yet
             _show_action_table(state)
