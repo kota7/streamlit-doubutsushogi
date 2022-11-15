@@ -12,9 +12,9 @@ interface State {
   isTurn1: boolean        // indicates that the next mover is the player 1 (bottom to top)
   selectedIndex: number   // index of selected cell, negative indicates no cell is selected
   images: string[]        // piece images, length 6 (include empty)
-  initData: number[]      // initial state data, length 19
   prevData: number[][]    // previous data list, older the first, format in: board + prisoners + [turn]
   nextData: number[][]    // next data list, newer the first, the same format as prevData
+  uiWidth: string         // non-default ui width
   isFocused: boolean
 }
 
@@ -23,43 +23,69 @@ interface State {
  * automatically when your component should be re-rendered.
  */
 class DoubutsuShogi extends StreamlitComponentBase<State> {
+
   public state = {
+    /* game state */
     board: [-3, -5, -2, 0, -1, 0, 0, 1, 0, 2, 5, 3],
     prisoners: [0, 0, 0, 0, 0, 0],
     isTurn1: true,
+
+    /* board selection */
     selectedIndex: -1,
-    images: ["", "", "", "", ""],
-    initData: [-3, -5, -2, 0, -1, 0, 0, 1, 0, 2, 5, 3, 0, 0, 0, 0, 0, 0, 1],
+
+    /* game history */
     prevData: [] as number[][],
     nextData: [] as number[][],
+
+    /* piece image data */
+    images: ["", "", "", "", ""],
+
+    uiWidth: "",
+
+    /* something we need? */
     isFocused: false
     //,numClicks: 0    
   }
 
+  /*
+  // we may add constructor in the future, but don't know yet
+  constructor(props: any) {
+    super(props)
+    console.log(props)
+  }
+  */
+
   componentDidMount(): void {
     //console.log("start componentDidMount")
-    this.state.board = this.state.initData.slice(0, 12)
-    this.state.prisoners = this.state.initData.slice(12, 18)
-    this.state.isTurn1 = this.state.initData[18]===1
-    this._applyTurn()
+    //this.state.board = this.state.initData.slice(0, 12)
+    //this.state.prisoners = this.state.initData.slice(12, 18)
+    //this.state.isTurn1 = this.state.initData[18]===1
+    this._applyCurrentState()
     // This is copied from the source of StreamlitComponentBase
     // By this, we tell Streamlit that our height has changed.
     // https://github.com/streamlit/streamlit/blob/develop/component-lib/src/StreamlitReact.tsx
     Streamlit.setFrameHeight();
   }
 
+  componentDidUpdate(): void {
+    this._applyCurrentState()
+    Streamlit.setFrameHeight();
+  }
+
   public render = (): ReactNode => {
     // Arguments that are passed to the plugin in Python are accessible
     // via `this.props.args`. Here, we access the "name" arg.
+    //console.log(this.props)
     const piecename = this.props.args["piecename"]
-    //const data = this.props.args["data"]
-    const prisoner_imgsize = this.props.args["prisoner_imgsize"]
-    const cellsize = this.props.args["cellsize"]
-    const piece_imgsize = this.props.args["piece_imgsize"]
-    const init_data = this.props.args["init_data"]
-    this.state.initData = init_data
-    //console.log("init_data given", init_data)
-    //console.log(this.state.initData)
+    const ui_width = this.props.args["ui_width"]
+    // const ui_width = this.props.args["ui_width"]
+    // const prisoner_imgsize = this.props.args["prisoner_imgsize"]
+    // const cellsize = this.props.args["cellsize"]
+    // const piece_imgsize = this.props.args["piece_imgsize"]
+    // const init_data = this.props.args["init_data"]
+    // this.state.initData = init_data
+
+    //console.log(ui_width)
 
     // Streamlit sends us a theme object via props that we can use to ensure
     // that our component has visuals that match the active theme in a
@@ -78,8 +104,8 @@ class DoubutsuShogi extends StreamlitComponentBase<State> {
       style.border = borderStyling
       style.outline = borderStyling
     }
-    
-    //console.log("loading piece images")
+
+    // Update the image data to the state
     // todo: ideally we want to load this only once
     const empty  = require(`./pieces/empty.png`)
     const hiyoko = require(`./pieces/${piecename}/hiyoko.png`)
@@ -88,78 +114,111 @@ class DoubutsuShogi extends StreamlitComponentBase<State> {
     const tori   = require(`./pieces/${piecename}/tori.png`)
     const lion   = require(`./pieces/${piecename}/lion.png`)
     this.state.images = [ empty, hiyoko, zou, kirin, tori, lion ]
-    
-    const texts = ["", "hiyoko", "zou", "kirin", "tori", "lion"]
-    const srcs = this.state.board.map( (i: number) => this.state.images[Math.abs(i)])
-    const alts = this.state.board.map( (i: number) => texts[Math.abs(i)])
-    const opps = this.state.board.map( (i: number) => i < 0 ? "piece opponent" : i > 0 ? "piece own" : "piece empty")
+
+    // Store non-default size parameters to the state
+    //console.log(ui_width)
+    if (ui_width != null) { 
+      this.state.uiWidth = ui_width; 
+      //console.log(this.state)
+    }
+
+    //const texts = ["", "hiyoko", "zou", "kirin", "tori", "lion"]
+    //const srcs = this.state.board.map( (i: number) => this.state.images[Math.abs(i)])
+    //const alts = this.state.board.map( (i: number) => texts[Math.abs(i)])
+    //const opps = this.state.board.map( (i: number) => i < 0 ? "piece opponent" : i > 0 ? "piece own" : "piece empty")
 
     return (
-      <div className="doubutsushogi-ui">
+      <div id="main-ui" className="doubutsushogi-ui">
 
-      <table><tbody>
-      <tr>
-        <td className="prisoner-cell"><img id="img15" className="prisoner-piece" alt="hiyoko" src={hiyoko} width={prisoner_imgsize} onClick={ (e)=>this.pieceClicked(15) } /><span className="prisoner-value" id="prisoner3">{this.state.prisoners[3]}</span>&nbsp;</td>
-        <td className="prisoner-cell"><img id="img16" className="prisoner-piece" alt="zou"    src={zou}    width={prisoner_imgsize} onClick={ (e)=>this.pieceClicked(16) } /><span className="prisoner-value" id="prisoner4">{this.state.prisoners[4]}</span>&nbsp;</td>
-        <td className="prisoner-cell"><img id="img17" className="prisoner-piece" alt="kirin"  src={kirin}  width={prisoner_imgsize} onClick={ (e)=>this.pieceClicked(17) } /><span className="prisoner-value" id="prisoner5">{this.state.prisoners[5]}</span>&nbsp;</td>
-        <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
-        <td className="turn-indicator-cell"><span id="turn-indicator2" className="turn-indicator">&#9663;</span></td>
-      </tr>
-      </tbody></table>
+      <div className="prisoner-row">
+        <div className="prisoner-cell">
+          <img id="img15" className="prisoner-image" alt="hiyoko" src={this.state.images[1]} onClick={ (e)=>this.pieceClicked(15) } />
+          <span className="prisoner-value" id="prisoner3">{this.state.prisoners[3]}</span>
+        </div>
+        <div className="prisoner-cell">
+          <img id="img16" className="prisoner-image" alt="zou" src={this.state.images[2]} onClick={ (e)=>this.pieceClicked(15) } />
+          <span className="prisoner-value" id="prisoner4">{this.state.prisoners[4]}</span>
+        </div>
+        <div className="prisoner-cell">
+          <img id="img17" className="prisoner-image" alt="kirin" src={this.state.images[3]} onClick={ (e)=>this.pieceClicked(15) } />
+          <span className="prisoner-value" id="prisoner5">{this.state.prisoners[5]}</span>
+        </div>
+        <div className="prisoner-sep"></div>
+        <div className="turn-indicator-cell">
+          <span id="turn-indicator2" className="turn-indicator">&#9663;</span>
+        </div>
+      </div>
 
-      <table className="board"><tbody>
-      <tr>
-        <td className="cell" id="cell0" width={cellsize} height={cellsize}><img id="img0" className={opps[0]} src={srcs[0]} alt={alts[0]} width={piece_imgsize} height={piece_imgsize} onClick={ (e)=>this.pieceClicked(0) } /></td>
-        <td className="cell" id="cell1" width={cellsize} height={cellsize}><img id="img1" className={opps[1]} src={srcs[1]} alt={alts[1]} width={piece_imgsize} height={piece_imgsize} onClick={ (e)=>this.pieceClicked(1) } /></td>
-        <td className="cell" id="cell2" width={cellsize} height={cellsize}><img id="img2" className={opps[2]} src={srcs[2]} alt={alts[2]} width={piece_imgsize} height={piece_imgsize} onClick={ (e)=>this.pieceClicked(2) } /></td>
-      </tr>
-      <tr>
-        <td className="cell" id="cell3" width={cellsize} height={cellsize}><img id="img3" className={opps[3]} src={srcs[3]} alt={alts[3]} width={piece_imgsize} height={piece_imgsize} onClick={ (e)=>this.pieceClicked(3) } /></td>
-        <td className="cell" id="cell4" width={cellsize} height={cellsize}><img id="img4" className={opps[4]} src={srcs[4]} alt={alts[4]} width={piece_imgsize} height={piece_imgsize} onClick={ (e)=>this.pieceClicked(4) } /></td>
-        <td className="cell" id="cell5" width={cellsize} height={cellsize}><img id="img5" className={opps[5]} src={srcs[5]} alt={alts[5]} width={piece_imgsize} height={piece_imgsize} onClick={ (e)=>this.pieceClicked(5) } /></td>
-      </tr>
-      <tr>
-        <td className="cell" id="cell6" width={cellsize} height={cellsize}><img id="img6" className={opps[6]} src={srcs[6]} alt={alts[6]} width={piece_imgsize} height={piece_imgsize} onClick={ (e)=>this.pieceClicked(6) } /></td>
-        <td className="cell" id="cell7" width={cellsize} height={cellsize}><img id="img7" className={opps[7]} src={srcs[7]} alt={alts[7]} width={piece_imgsize} height={piece_imgsize} onClick={ (e)=>this.pieceClicked(7) } /></td>
-        <td className="cell" id="cell8" width={cellsize} height={cellsize}><img id="img8" className={opps[8]} src={srcs[8]} alt={alts[8]} width={piece_imgsize} height={piece_imgsize} onClick={ (e)=>this.pieceClicked(8) } /></td>
-      </tr>
-      <tr>
-        <td className="cell" id="cell9" width={cellsize} height={cellsize}><img id="img9" className={opps[9]} src={srcs[9]} alt={alts[9]} width={piece_imgsize} height={piece_imgsize} onClick={ (e)=>this.pieceClicked(9) } /></td>
-        <td className="cell" id="cell10" width={cellsize} height={cellsize}><img id="img10" className={opps[10]} src={srcs[10]} alt={alts[10]} width={piece_imgsize} height={piece_imgsize} onClick={ (e)=>this.pieceClicked(10) } /></td>
-        <td className="cell" id="cell11" width={cellsize} height={cellsize}><img id="img11" className={opps[11]} src={srcs[11]} alt={alts[11]} width={piece_imgsize} height={piece_imgsize} onClick={ (e)=>this.pieceClicked(11) } /></td>
-      </tr>
-      </tbody></table>
+      <div className="board">
+        <div id="row0" className="board-row">
+          <div id="cell0" className="piece-cell"><img id="img0" className="piece-image" alt="piece0" onClick={ (e)=>this.pieceClicked(0) }/></div>
+          <div id="cell1" className="piece-cell"><img id="img1" className="piece-image" alt="piece1" onClick={ (e)=>this.pieceClicked(1) }/></div>
+          <div id="cell2" className="piece-cell"><img id="img2" className="piece-image" alt="piece2" onClick={ (e)=>this.pieceClicked(2) }/></div>
+        </div>
+        <div id="row1" className="board-row">
+          <div id="cell3" className="piece-cell"><img id="img3" className="piece-image" alt="piece3" onClick={ (e)=>this.pieceClicked(3) }/></div>
+          <div id="cell4" className="piece-cell"><img id="img4" className="piece-image" alt="piece4" onClick={ (e)=>this.pieceClicked(4) }/></div>
+          <div id="cell5" className="piece-cell"><img id="img5" className="piece-image" alt="piece5" onClick={ (e)=>this.pieceClicked(5) }/></div>
+        </div>
+        <div id="row2" className="board-row">
+          <div id="cell6" className="piece-cell"><img id="img6" className="piece-image" alt="piece6" onClick={ (e)=>this.pieceClicked(6) }/></div>
+          <div id="cell7" className="piece-cell"><img id="img7" className="piece-image" alt="piece7" onClick={ (e)=>this.pieceClicked(7) }/></div>
+          <div id="cell8" className="piece-cell"><img id="img8" className="piece-image" alt="piece8" onClick={ (e)=>this.pieceClicked(8) }/></div>
+        </div>
+        <div id="row3" className="board-row">
+          <div id="cell9" className="piece-cell"><img id="img9" className="piece-image" alt="piece9" onClick={ (e)=>this.pieceClicked(9) }/></div>
+          <div id="cell10" className="piece-cell"><img id="img10" className="piece-image" alt="piece10" onClick={ (e)=>this.pieceClicked(10) }/></div>
+          <div id="cell11" className="piece-cell"><img id="img11" className="piece-image" alt="piece11" onClick={ (e)=>this.pieceClicked(11) }/></div>
+        </div>
 
-      <table><tbody>
-      <tr>
-        <td className="prisoner-cell"><img id="img12" className="prisoner-piece" alt="hiyoko" src={hiyoko} width={prisoner_imgsize} onClick={ (e)=>this.pieceClicked(12) } /><span className="prisoner-value" id="prisoner0">{this.state.prisoners[0]}</span>&nbsp;</td>
-        <td className="prisoner-cell"><img id="img13" className="prisoner-piece" alt="zou"    src={zou}    width={prisoner_imgsize} onClick={ (e)=>this.pieceClicked(13) } /><span className="prisoner-value" id="prisoner1">{this.state.prisoners[1]}</span>&nbsp;</td>
-        <td className="prisoner-cell"><img id="img14" className="prisoner-piece" alt="kirin"  src={kirin}  width={prisoner_imgsize} onClick={ (e)=>this.pieceClicked(14) } /><span className="prisoner-value" id="prisoner2">{this.state.prisoners[2]}</span>&nbsp;</td>
-        <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
-        <td className="turn-indicator-cell"><span id="turn-indicator1" className="turn-indicator">&#9650;</span></td>
-      </tr>
-      </tbody></table>
+      </div>
 
-      <table><tbody>
-      <tr><td>&nbsp;</td></tr>
-      <tr className="controls">
-        <td className="control"><span id="to-start" className="control-button inactive" onClick={this.toStart}>&lt;&lt;</span></td>
-        <td className="control"><span id="to-prev" className="control-button inactive" onClick={this.toPrev}>&lt;</span></td>
-        <td>&nbsp;&nbsp;&nbsp;</td>
-        <td className="control"><span id="to-next" className="control-button inactive" onClick={this.toNext}>&gt;</span></td>
-        <td className="control"><span id="to-last" className="control-button inactive" onClick={this.toLast}>&gt;&gt;</span></td>
-        <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
-        <td className="control"><span id="board-flip" className="control-button" onClick={this.flipBoard}>&#8645;</span></td>        
-      </tr>
-      </tbody></table>
+      <div className="prisoner-row">
+        <div className="prisoner-cell">
+          <img id="img12" className="prisoner-image" alt="hiyoko" src={this.state.images[1]} onClick={ (e)=>this.pieceClicked(12) } />
+          <span className="prisoner-value" id="prisoner3">{this.state.prisoners[0]}</span>
+        </div>
+        <div className="prisoner-cell">
+          <img id="img13" className="prisoner-image" alt="zou" src={this.state.images[2]} onClick={ (e)=>this.pieceClicked(13) } />
+          <span className="prisoner-value" id="prisoner4">{this.state.prisoners[1]}</span>
+        </div>
+        <div className="prisoner-cell">
+          <img id="img14" className="prisoner-image" alt="kirin" src={this.state.images[3]} onClick={ (e)=>this.pieceClicked(14) } />
+          <span className="prisoner-value" id="prisoner5">{this.state.prisoners[2]}</span>
+        </div>
+        <div className="prisoner-sep"></div>
+        <div className="turn-indicator-cell">
+          <span id="turn-indicator1" className="turn-indicator next-mover">&#9650;</span>
+        </div>
+      </div>
+
+      <div className="control-row">
+        <div id="to-start" className="control-button inactive" onClick={this.toStart}><strong>&lt;&lt;</strong></div>
+        <div id="to-prev" className="control-button inactive" onClick={this.toPrev}><strong>&lt;</strong></div>
+        <div className="control-sep"></div>
+        <div id="to-next" className="control-button inactive" onClick={this.toNext}><strong>&gt;</strong></div>
+        <div id="to-last" className="control-button inactive" onClick={this.toLast}><strong>&gt;&gt;</strong></div>
+        <div className="control-sep"></div>
+        <div className="control-sep"></div>
+        <div className="control-sep"></div>
+        <div className="control-sep"></div>
+        <div id="refresh" className="control-button"><strong>&#11119;</strong></div>
+        <div id="board-flip" className="control-button" onClick={this.flipBoard}><strong>&#8645;</strong></div>
+      </div>
+
       </div>
     )
   }
 
   // Access method to the html elements
+  private _getMainUI = () => {
+    return document.getElementById("main-ui")
+  }
+
   private _getPrisoner = (index: number) => {
     return document.getElementById(`prisoner${index}`)
   }
+
   private _getImage = (index: number): HTMLImageElement | undefined => { 
     return document.getElementById(`img${index}`) as HTMLImageElement;
   }
@@ -177,6 +236,18 @@ class DoubutsuShogi extends StreamlitComponentBase<State> {
     return document.getElementById(`turn-indicator${index}`)
   }  
   //
+
+  // Size adjustment 
+  private _applySizes = (): void => {
+    //console.log("Applying sizes...")
+    if (this.state.uiWidth !== "") {
+      //console.log("UI width to", this.state.uiWidth)
+      const mainui = this._getMainUI()
+      if (mainui != null) {
+        mainui.style.width = this.state.uiWidth
+      }
+    }
+  }
 
   // Prev and Next funcationality
   private toPrev = (): void => {
@@ -325,6 +396,8 @@ class DoubutsuShogi extends StreamlitComponentBase<State> {
     })
     // Turn indicator
     this._applyTurn()
+    // Size
+    this._applySizes()
   }
   //
 
