@@ -61,6 +61,7 @@ class DoubutsuShogi extends StreamlitComponentBase<State> {
     //this.state.prisoners = this.state.initData.slice(12, 18)
     //this.state.isTurn1 = this.state.initData[18]===1
     this._applyCurrentState()
+    this._reportCurrentStatus()
     // This is copied from the source of StreamlitComponentBase
     // By this, we tell Streamlit that our height has changed.
     // https://github.com/streamlit/streamlit/blob/develop/component-lib/src/StreamlitReact.tsx
