@@ -70,21 +70,53 @@ def _show_action_table(state):
         st.dataframe(df)
 
 def _parse_state_text(state_text)-> State:
+    if state_text == "":
+        return None
     try:
         s = State.from_text(state_text)
         return s
     except Exception as e:
-        logger.warning("Invalid state text: '%s'", state_text)
+        logger.info("Invalid state text: '%s', converted to None", state_text)
     return None
+
+def _initialize_session_values():
+    names = [
+        ("stateQueue", None),
+        ("actionQueue", None)
+    ]
+    for name_, value in names:
+        name = _ns(name_)
+        if name not in st.session_state:
+            logger.info("Initialized session value '%s' to '%s'", name, value)
+            st.session_state[name] = value
+
+def _get_session_value(name):
+    return st.session_state.get(_ns(name), None)
+
+def _set_session_value(name, value):
+    st.session_state[_ns(name)] = value
+
+def _pop_state_queue():
+    value = _get_session_value("stateQueue")
+    _set_state_queue(None)
+    return value
+
+def _set_state_queue(value):
+    _set_session_value("stateQueue", value)
+
+def _update_state_queue():
+    _set_state_queue(_parse_state_text(st.session_state[_ns("state_text")]))
 
 def study_app(prefix="study", piecename="emoji1"):
 
     left, right = st.columns([5, 7])
     with right:
-        state_text = st.text_input("Go to: ", placeholder="klz.h..H.ZLK0000001", disabled=True, help="This features is under development")
+        state_text = st.text_input("Go to: ", placeholder="klz.h..H.ZLK0000001",
+                                   disabled=False, key=_ns("state_text"), on_change=_update_state_queue)
 
     with left:
-        state, status, action = st_doubutsushogi(piecename=piecename, key=_ns("board"))
+        state, status, action = st_doubutsushogi(state=_pop_state_queue(), piecename=piecename, key=_ns("board"))
+        #state, status, action = st_doubutsushogi(state=_parse_state_text(state_text), piecename=piecename, key=_ns("board"))
         logger.info("Received value from the board UI: %s", (state, status, action))
 
     with right:
