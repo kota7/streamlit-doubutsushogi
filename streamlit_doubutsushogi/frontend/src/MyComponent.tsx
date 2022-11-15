@@ -63,7 +63,7 @@ class DoubutsuShogi extends StreamlitComponentBase<State> {
     //this.state.isTurn1 = this.state.initData[18]===1
     this._applyCurrentState()
     this._applySizes()
-    this._reportCurrentStatus()
+    this._reportCurrentStatus()  // This make sures that the Python side receives the starting state
     // This is copied from the source of StreamlitComponentBase
     // By this, we tell Streamlit that our height has changed.
     // https://github.com/streamlit/streamlit/blob/develop/component-lib/src/StreamlitReact.tsx
