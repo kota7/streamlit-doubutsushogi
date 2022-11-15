@@ -13,6 +13,10 @@ def _ns(name):
     return f"study-{name}"
 
 def _show_status_summary(state):
+    if state is None:
+        st.markdown("")
+        return
+
     status = state.status
     if status == 0:
         value = evaluate_states([state])[0]
