@@ -38,7 +38,7 @@ def _optimal_path_text(state, depth=6, randomize=True):
     return out
 
 def _show_action_table(state):
-    if state.status != 0:
+    if state is None or state.status != 0:
         # game is over, we will return an empty table
         df = pd.DataFrame({
             "action": [],
