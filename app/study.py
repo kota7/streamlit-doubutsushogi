@@ -98,6 +98,7 @@ def _set_session_value(name, value):
 
 def _pop_state_queue():
     value = _get_session_value("stateQueue")
+    logger.debug("state value from queue: %s", repr(value))
     _set_state_queue(None)
     return value
 
