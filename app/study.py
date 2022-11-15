@@ -9,6 +9,8 @@ from streamlit_doubutsushogi import st_doubutsushogi
 from doubutsushogi.game import State
 from doubutsushogi.evaluate import evaluate_states, remaining_steps, optimal_path, MAXVALUE
 
+def _ns(name):
+    return f"study-{name}"
 
 def _show_status_summary(state):
     status = state.status
@@ -78,12 +80,10 @@ def study_app(prefix="study", piecename="emoji1"):
         state_text = st.text_input("Go to: ", placeholder="klz.h..H.ZLK0000001", disabled=True, help="This features is under development")
 
     with left:
-        state, status, action = st_doubutsushogi(state=_parse_state_text(state_text), piecename=piecename, cellsize="100px", piece_imgsize="90", prisoner_imgsize="60px")
+        state, status, action = st_doubutsushogi(piecename=piecename, key=_ns("board"))
         logger.info("Received value from the board UI: %s", (state, status, action))
 
     with right:
         _show_status_summary(state)
         if state.status == 0:   # only show the table if the game is not over yet
             _show_action_table(state)
-
-
