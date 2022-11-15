@@ -10,7 +10,7 @@ from doubutsushogi import evaluate_states, initial_state
 from study import study_app
 from play import play_app
 
-_app_version = "0.0.8dev"  # this is the version number of the app, not the library
+_app_version = "0.0.8"  # this is the version number of the app, not the library
 
 def _get_library_version(libname):
     # python 3.8+
