@@ -5,6 +5,8 @@ import {
 } from "streamlit-component-lib"
 import React, { ReactNode } from "react"
 
+
+
 interface State {
   //numClicks: number
   board: number[]         // board status, length 12
