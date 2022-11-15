@@ -1,69 +1,94 @@
+.doubutsushogi-ui {
+  /* temporarilt we fix the ui fidth */
+  width: 300px;
+  /* show border for debugging */
+  /* border: 2px solid #ff0000; */
+}
+
+
+/* Prisoner and turn indicator */
+.prisoner-row {
+  display: flex;
+  padding: 0%;
+  margin: 0%;
+}
+
 .prisoner-cell {
   background-color: #efefef;
+  max-width: 20%;
+  display: flex;
+  align-items: flex-end;
   vertical-align: bottom;
+  padding-right: 2%;
 }
 
 .prisoner-value {
   vertical-align: bottom;
 }
-/*
-.prisoner-piece {
-  filter: brightness(100%);
+
+.prisoner-image {
+  max-width: 85%;
+  padding: 0%;
+  margin: 0%;
 }
-*/
-.cell {
-  background-color: #ddf5dd;
-  border: 1px #777777 dashed;
+
+.prisoner-sep {
+  width: 20%;
+}
+
+.turn-indicator-cell {
+  max-width: 20%;
+  text-align: left;
+  /* show border for debugging */
+  /* border: 2px solid #ff0000; */
+}
+
+.turn-indicator {
+  font-size: 30px;
+  text-align: left;
+  filter: opacity(25%);
+}
+
+.next-mover {
+  filter: opacity(100%);
+}
+
+
+/* Board and pieces */
+.board {
+  padding-top: 2%;
+  padding-bottom: 2%;
+}
+
+.board-row {
   text-align: center;
-  vertical-align: middle;
+  display: flex;
+  padding: 0%;
+  margin: 0%;
+
+  /* debug border */
+  /* border: 2px solid #ff0000; */
+}
+
+.piece-cell {
+  border: 1px dashed #777777;
+  background-color: #ddf5dd;
+  width: 33%;
+  aspect-ratio: 1;
   display: inline-block;
+  text-align: center;
+  margin: 0%;
+}
+
+.piece-image {
+  width: 90%;
+  padding: 5%;
+  margin: 0%;
 }
 
 .opponent {
   transform: rotate(180deg);
 }
-
-.board {
-  table-layout: fixed;
-}
-
-/*
-.doubutsushogi-ui {
-  overflow: hidden;
-}
-*/
-
-/*
-.piece {
-  filter: brightness(100%); 
-  /* box-shadow: 2px 2px 2px #464646, -2px -2px 2px #464646; }; */
-}
-*/
-
-/* Firefox old*/
-@-moz-keyframes blink {
-  0%   { opacity :1.0; }
-  50%  { opacity :0.2; }
-  100% { opacity :1.0; }
-} 
-
-@-webkit-keyframes blink {
-  0%   { opacity :1.0; }
-  50%  { opacity :0.2; }
-  100% { opacity :1.0; }
-}
-/* IE */
-@-ms-keyframes blink {
-  0%   { opacity :1.0; }
-  50%  { opacity :0.2; }
-  100% { opacity :1.0; }
-} 
-/* Opera and prob css3 final iteration */
-@keyframes blink {
-  0%   { opacity :1.0; }
-  50%  { opacity :0.2; }
-  100% { opacity :1.0; }
-} 
 
 .selected {
 	-webkit-animation: blink 1.7s linear infinite alternate;
@@ -81,23 +106,34 @@
   filter: brightness(70%);
 }
 
-/*
-.highlighted {
-  filter: brightness(80%);
+
+/* Control buttons */
+.control-row {
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  padding: 0%;
+  padding-top: 3%;
+  margin: 0%;
+
+  /* debug border */
+  /* border: 2px solid #ff0000; */
 }
-*/
+
+.control-sep {
+  width: 2%;
+}
 
 .control-button {
-  justify-content: center;
-  align-content: center;
-  display: inline-block;
-  width: 40px;
-  height: 40px;
+  margin: 1%;
+  padding: 1% 0 0 0;
+  text-align: center;
   border: 3px #222222 solid;
   border-radius: 25px; 
-  text-align: center;
-  font-size: 20px;
-  font-style: bold;
+  width: 13%;
+  aspect-ratio: 1;
+  /*font-style: bold;*/
+  font-size: 110%;
   /* Make sure the cursor does not change for text */
   cursor: default;
 
@@ -125,21 +161,30 @@
   filter: opacity(40%);
 }
 
-.control {
-  padding: 3px;
+
+/* Animation */
+@-moz-keyframes blink {
+  /* Firefox old*/
+  0%   { opacity :1.0; }
+  50%  { opacity :0.2; }
+  100% { opacity :1.0; }
 }
 
-.controls {
-  cursor: default;
+@-webkit-keyframes blink {
+  0%   { opacity :1.0; }
+  50%  { opacity :0.2; }
+  100% { opacity :1.0; }
 }
 
-
-.turn-indicator {
-  font-size: 30px;
-  text-align: left;
-  filter: opacity(25%);
+@-ms-keyframes blink {
+  /* IE */
+  0%   { opacity :1.0; }
+  50%  { opacity :0.2; }
+  100% { opacity :1.0; }
 }
-
-.next-mover {
-  filter: opacity(100%);
+/* Opera and prob css3 final iteration */
+@keyframes blink {
+  0%   { opacity :1.0; }
+  50%  { opacity :0.2; }
+  100% { opacity :1.0; }
 }

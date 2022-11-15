@@ -7,7 +7,7 @@ import streamlit.components.v1 as components
 from doubutsushogi.game import State, Action, PRISONER_INDEX
 logger = getLogger(__name__)
 
-__version__ = "0.0.12"
+__version__ = "0.0.15"
 
 # Create a _RELEASE constant. We'll set this to False while we're developing
 # the component, and True when we're ready to package and distribute it.
@@ -51,17 +51,24 @@ else:
 # `declare_component` and call it done. The wrapper allows us to customize
 # our component's API: we can pre-process its input args, post-process its
 # output value, and add a docstring for users.
-def st_doubutsushogi(state=None, piecename="emoji1", key=None, cellsize="100px", piece_imgsize="90", prisoner_imgsize="60px"):
+def st_doubutsushogi(state=None, action=None, piecename="emoji1", ui_width=None, key=None):
+    #, ui_width=None, cellsize="100px", piece_imgsize="90", prisoner_imgsize="60px"
     """
     Create a new instance of st_doubutsushogi, a game UI.
 
     Args:
+        state: State or None
+            If given, the UI starts with this state.
+        action: Action or None
+            If given, the UI will execute this action.
         piecename: str 
             Accepts one of ("emoji1", "emoji2", "emoji3", "hiragana")
             The name of piece images.
+        ui_width: str or None
+            If given, create the UI with this width.
+            Currenly internal component sizes are calculated relative to this size.
 
     Returns: list
-
     """
     # Call through to our private component function. Arguments we pass here
     # will be sent to the frontend, where they'll be available in an "args"
@@ -69,19 +76,27 @@ def st_doubutsushogi(state=None, piecename="emoji1", key=None, cellsize="100px",
     #
     # "default" is a special argument that specifies the initial return
     # value of the component before the user has interacted with it.
-    s = state or State.initial_state()
+    # s = state or State.initial_state()
     #print(s)
     
-    default = list(s._data) + [s.status]
+    # default = list(s._data) + [s.status]
+
+    # pass list to the component
+    _state = None if state is None else state._data
+    _action = None if action is None else [action.piece, action.index_from, action.index_to]
     assert piecename in ("emoji1", "emoji2", "emoji3", "hiragana")
     component_value = _component_func(
         piecename=piecename,
+        state=_state,
+        action=_action,
+        ui_width=ui_width,
+        # ui_width=1,
+        # cellsize=cellsize,
+        # piece_imgsize=piece_imgsize,
+        # prisoner_imgsize=prisoner_imgsize,
+        # init_data=s._data,
         key=key,
-        cellsize=cellsize,
-        piece_imgsize=piece_imgsize,
-        prisoner_imgsize=prisoner_imgsize,
-        init_data=s._data,
-        default=default
+        default=[]
     )
 
     # We could modify the value returned from the component if we wanted.
@@ -113,16 +128,24 @@ if __name__ == "__main__":
         # test run of the local app
         # to do this, we add this component to the pythonpath, so that the app uses this local package
         # we also add the app directory and call its main function here
-        import os
-        import sys
 
-        componentdir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../"))
-        appdir = os.path.join(componentdir, "app")
-        sys.path.insert(0, appdir)
-        sys.path.insert(0, componentdir)
-        import streamlit_app
-        streamlit_app.main()
-        #st_doubutsushogi(key=1)
-        #st_doubutsushogi(key=2)
+        if False:
+            x = st_doubutsushogi()
+            print(x)
+
+            x = st_doubutsushogi(ui_width="150px", key=2)
+            print(x)
+
+            x = st_doubutsushogi(ui_width="400px", key=3)
+            print(x)
+        else:
+            import os
+            import sys
+            componentdir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../"))
+            appdir = os.path.join(componentdir, "app")
+            sys.path.insert(0, appdir)
+            sys.path.insert(0, componentdir)
+            import streamlit_app
+            streamlit_app.main()
 
 

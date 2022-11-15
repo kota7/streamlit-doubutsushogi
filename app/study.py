@@ -9,8 +9,14 @@ from streamlit_doubutsushogi import st_doubutsushogi
 from doubutsushogi.game import State
 from doubutsushogi.evaluate import evaluate_states, remaining_steps, optimal_path, MAXVALUE
 
+def _ns(name):
+    return f"study-{name}"
 
 def _show_status_summary(state):
+    if state is None:
+        st.markdown("")
+        return
+
     status = state.status
     if status == 0:
         value = evaluate_states([state])[0]
@@ -36,7 +42,7 @@ def _optimal_path_text(state, depth=6, randomize=True):
     return out
 
 def _show_action_table(state):
-    if state.status != 0:
+    if state is None or state.status != 0:
         # game is over, we will return an empty table
         df = pd.DataFrame({
             "action": [],
@@ -78,12 +84,10 @@ def study_app(prefix="study", piecename="emoji1"):
         state_text = st.text_input("Go to: ", placeholder="klz.h..H.ZLK0000001", disabled=True, help="This features is under development")
 
     with left:
-        state, status, action = st_doubutsushogi(state=_parse_state_text(state_text), piecename=piecename, cellsize="100px", piece_imgsize="90", prisoner_imgsize="60px")
+        state, status, action = st_doubutsushogi(piecename=piecename, key=_ns("board"))
         logger.info("Received value from the board UI: %s", (state, status, action))
 
     with right:
         _show_status_summary(state)
-        if state.status == 0:   # only show the table if the game is not over yet
+        if state is not None and state.status == 0:   # only show the table if the game is not over yet
             _show_action_table(state)
-
-
