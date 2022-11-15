@@ -40,6 +40,7 @@ class DoubutsuShogi extends StreamlitComponentBase<State> {
     /* piece image data */
     images: ["", "", "", "", ""],
 
+    /* Sizing */
     uiWidth: "",
 
     /* something we need? */
@@ -61,6 +62,7 @@ class DoubutsuShogi extends StreamlitComponentBase<State> {
     //this.state.prisoners = this.state.initData.slice(12, 18)
     //this.state.isTurn1 = this.state.initData[18]===1
     this._applyCurrentState()
+    this._applySizes()
     this._reportCurrentStatus()
     // This is copied from the source of StreamlitComponentBase
     // By this, we tell Streamlit that our height has changed.
@@ -70,6 +72,7 @@ class DoubutsuShogi extends StreamlitComponentBase<State> {
 
   componentDidUpdate(): void {
     this._applyCurrentState()
+    this._applySizes()
     Streamlit.setFrameHeight();
   }
 
@@ -85,8 +88,14 @@ class DoubutsuShogi extends StreamlitComponentBase<State> {
     // const piece_imgsize = this.props.args["piece_imgsize"]
     // const init_data = this.props.args["init_data"]
     // this.state.initData = init_data
-
     //console.log(ui_width)
+    const state_data = this.props.args["state"]  // non-default board state is given
+    if (state_data != null) {
+      console.log("board state:", state_data)
+      // go to this state
+      this._setStateData(state_data, true)
+      this._reportCurrentStatus()
+    }
 
     // Streamlit sends us a theme object via props that we can use to ensure
     // that our component has visuals that match the active theme in a
@@ -203,7 +212,7 @@ class DoubutsuShogi extends StreamlitComponentBase<State> {
         <div className="control-sep"></div>
         <div className="control-sep"></div>
         <div className="control-sep"></div>
-        <div id="refresh" className="control-button"><strong>&#11119;</strong></div>
+        <div id="refresh" className="control-button" onClick={this.refreshGame}><strong>&#11119;</strong></div>
         <div id="board-flip" className="control-button" onClick={this.flipBoard}><strong>&#8645;</strong></div>
       </div>
 
@@ -238,6 +247,56 @@ class DoubutsuShogi extends StreamlitComponentBase<State> {
   }  
   //
 
+  // Update state with a given data or action
+  private refreshGame = (): void => {
+    this._setStateData([-3, -5, -2, 0, -1, 0, 0, 1, 0, 2, 5, 3, 0, 0, 0, 0, 0, 0, 1], true)
+    this._reportCurrentStatus()  // this also update the visuals due to componentDidUpdate invoked
+  }
+
+  private _setStateData = (data: number[], clear_history: boolean): void => {
+    if (!this._validateStateData(data)) {
+      //console.log("Invalid state data, will not apply")
+      return
+    }
+    //console.log("Going to the state: ", data)
+    this.state.board     = data.slice(0, 12)
+    this.state.prisoners = data.slice(12, 18)
+    this.state.isTurn1   = (data[18] === 1)
+    this._unselect()
+
+    if (clear_history) {
+      this._clearHistory()
+    }
+  }
+
+  private _clearHistory = (): void => {
+    //console.log("Clearing history")
+    this.state.prevData.length = 0
+    this.state.nextData.length = 0
+    this._updateButtonState()  // apply to visual
+  }
+
+  private _validateStateData = (data: number[]): boolean => {
+    if (data.length !== 19) {
+      console.log("data must be length 19")
+      return false
+    }
+    if (!data.slice(0, 12).every( (n: number) => { return (n >= -5 && n <= 5) }) ) {
+      console.log("board piece must be in [-5, 5]")
+      return false
+    }
+    if (!data.slice(12, 18).every( (n:number) => { return (n >= 0 && n <= 2) }) ) {
+      console.log("prisoner count must be [0, 2]")
+      return false
+    }
+    if (data[18] !== 1 && data[18] !== 2) {
+      console.log("turn must be 1 or 2")
+      return false
+    }
+    return true
+  }
+  //
+
   // Size adjustment 
   private _applySizes = (): void => {
     //console.log("Applying sizes...")
@@ -249,6 +308,7 @@ class DoubutsuShogi extends StreamlitComponentBase<State> {
       }
     }
   }
+  //
 
   // Prev and Next funcationality
   private toPrev = (): void => {
@@ -261,7 +321,8 @@ class DoubutsuShogi extends StreamlitComponentBase<State> {
     this._updateButtonState() // we need to change active/inactive status of buttons
 
     // set the prev data to the board state
-    this._setData(data)
+    //this._setData(data)
+    this._setStateData(data, false)
     // report to the python side
     this._reportCurrentStatus()
   }
@@ -276,7 +337,8 @@ class DoubutsuShogi extends StreamlitComponentBase<State> {
     this._updateButtonState() // we need to change active/inactive status of buttons
 
     // set the prev data to the board state
-    this._setData(data)
+    //this._setData(data)
+    this._setStateData(data, false)
     // report to the python side
     this._reportCurrentStatus()
   }
@@ -293,7 +355,8 @@ class DoubutsuShogi extends StreamlitComponentBase<State> {
     this._updateButtonState() // we need to change active/inactive status of buttons
 
     // set the prev data to the board state
-    this._setData(data)
+    //this._setData(data)
+    this._setStateData(data, false)
     // report to the python side
     this._reportCurrentStatus()
   }
@@ -310,11 +373,13 @@ class DoubutsuShogi extends StreamlitComponentBase<State> {
     this._updateButtonState() // we need to change active/inactive status of buttons
 
     // set the prev data to the board state
-    this._setData(data)
+    //this._setData(data)
+    this._setStateData(data, false)
     // report to the python side
     this._reportCurrentStatus()
   }
 
+  /*
   private _setData = (data: number[]): void => {
     // update state
     this.state.board = data.slice(0, 12)
@@ -323,6 +388,7 @@ class DoubutsuShogi extends StreamlitComponentBase<State> {
     // update visual
     this._applyCurrentState()    
   }
+  */
 
   private _currentData = (): number[] => {
     return this.state.board.concat(this.state.prisoners).concat(
@@ -331,6 +397,7 @@ class DoubutsuShogi extends StreamlitComponentBase<State> {
   }
 
   private _updateButtonState = (): void => {
+    // todo. maybe rename to _apply?
     const prev_button = this._getPrevButton()
     const start_button = this._getStartButton()
     //console.log(prev_button, start_button)
@@ -397,8 +464,8 @@ class DoubutsuShogi extends StreamlitComponentBase<State> {
     })
     // Turn indicator
     this._applyTurn()
-    // Size
-    this._applySizes()
+    // Buttons
+    this._updateButtonState()
   }
   //
 

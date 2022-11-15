@@ -7,7 +7,7 @@ import streamlit.components.v1 as components
 from doubutsushogi.game import State, Action, PRISONER_INDEX
 logger = getLogger(__name__)
 
-__version__ = "0.0.15"
+__version__ = "0.0.16"
 
 # Create a _RELEASE constant. We'll set this to False while we're developing
 # the component, and True when we're ready to package and distribute it.
@@ -82,6 +82,7 @@ def st_doubutsushogi(state=None, action=None, piecename="emoji1", ui_width=None,
     # default = list(s._data) + [s.status]
 
     # pass list to the component
+    print(); print(state)
     _state = None if state is None else state._data
     _action = None if action is None else [action.piece, action.index_from, action.index_to]
     assert piecename in ("emoji1", "emoji2", "emoji3", "hiragana")
