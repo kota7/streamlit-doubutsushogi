@@ -150,11 +150,11 @@ class DoubutsuShogi extends StreamlitComponentBase<State> {
           <span className="prisoner-value" id="prisoner3">{this.state.prisoners[3]}</span>
         </div>
         <div className="prisoner-cell">
-          <img id="img16" className="prisoner-image" alt="zou" src={this._getPieceImage(2)} onClick={ (e)=>this.pieceClicked(15) } />
+          <img id="img16" className="prisoner-image" alt="zou" src={this._getPieceImage(2)} onClick={ (e)=>this.pieceClicked(16) } />
           <span className="prisoner-value" id="prisoner4">{this.state.prisoners[4]}</span>
         </div>
         <div className="prisoner-cell">
-          <img id="img17" className="prisoner-image" alt="kirin" src={this._getPieceImage(3)} onClick={ (e)=>this.pieceClicked(15) } />
+          <img id="img17" className="prisoner-image" alt="kirin" src={this._getPieceImage(3)} onClick={ (e)=>this.pieceClicked(17) } />
           <span className="prisoner-value" id="prisoner5">{this.state.prisoners[5]}</span>
         </div>
         <div className="prisoner-sep"></div>
