@@ -12,8 +12,8 @@ interface State {
   prisoners: number[]     // prisoner counts, length 6
   isTurn1: boolean        // indicates that the next mover is the player 1 (bottom to top)
   selectedIndex: number   // index of selected cell, negative indicates no cell is selected
-  images: string[]        // piece images, length 6 (include empty)
-  //piecename: string       // name of piece type to use
+  //images: string[]        // piece images, length 6 (include empty)
+  pieceName: keyof typeof pieceImages       // name of piece type to use
   prevData: number[][]    // previous data list, older the first, format in: board + prisoners + [turn]
   nextData: number[][]    // next data list, newer the first, the same format as prevData
   uiWidth: string         // non-default ui width
@@ -40,8 +40,8 @@ class DoubutsuShogi extends StreamlitComponentBase<State> {
     nextData: [] as number[][],
 
     /* piece image data */
-    images: ["", "", "", "", ""],
-    
+    //images: ["", "", "", "", ""],
+    pieceName: "emoji1" as keyof typeof pieceImages,
     /* Sizing */
     uiWidth: "",
 
@@ -83,7 +83,7 @@ class DoubutsuShogi extends StreamlitComponentBase<State> {
     // via `this.props.args`. Here, we access the "name" arg.
     //console.log(this.props)
     const piecename: keyof typeof pieceImages = this.props.args["piecename"]
-    //this.state.piecename = piecename
+    this.state.pieceName = piecename
     const ui_width = this.props.args["ui_width"]
     // const ui_width = this.props.args["ui_width"]
     // const prisoner_imgsize = this.props.args["prisoner_imgsize"]
@@ -127,7 +127,7 @@ class DoubutsuShogi extends StreamlitComponentBase<State> {
     // const kirin  = require(`./pieces/${piecename}/kirin.png`)
     // const tori   = require(`./pieces/${piecename}/tori.png`)
     // const lion   = require(`./pieces/${piecename}/lion.png`)
-    this.state.images = pieceImages[piecename]
+    //this.state.images = pieceImages[piecename]
 
     // Store non-default size parameters to the state
     //console.log(ui_width)
@@ -146,15 +146,15 @@ class DoubutsuShogi extends StreamlitComponentBase<State> {
 
       <div className="prisoner-row">
         <div className="prisoner-cell">
-          <img id="img15" className="prisoner-image" alt="hiyoko" src={this.state.images[1]} onClick={ (e)=>this.pieceClicked(15) } />
+          <img id="img15" className="prisoner-image" alt="hiyoko" src={this._getPieceImage(1)} onClick={ (e)=>this.pieceClicked(15) } />
           <span className="prisoner-value" id="prisoner3">{this.state.prisoners[3]}</span>
         </div>
         <div className="prisoner-cell">
-          <img id="img16" className="prisoner-image" alt="zou" src={this.state.images[2]} onClick={ (e)=>this.pieceClicked(15) } />
+          <img id="img16" className="prisoner-image" alt="zou" src={this._getPieceImage(2)} onClick={ (e)=>this.pieceClicked(15) } />
           <span className="prisoner-value" id="prisoner4">{this.state.prisoners[4]}</span>
         </div>
         <div className="prisoner-cell">
-          <img id="img17" className="prisoner-image" alt="kirin" src={this.state.images[3]} onClick={ (e)=>this.pieceClicked(15) } />
+          <img id="img17" className="prisoner-image" alt="kirin" src={this._getPieceImage(3)} onClick={ (e)=>this.pieceClicked(15) } />
           <span className="prisoner-value" id="prisoner5">{this.state.prisoners[5]}</span>
         </div>
         <div className="prisoner-sep"></div>
@@ -189,15 +189,15 @@ class DoubutsuShogi extends StreamlitComponentBase<State> {
 
       <div className="prisoner-row">
         <div className="prisoner-cell">
-          <img id="img12" className="prisoner-image" alt="hiyoko" src={this.state.images[1]} onClick={ (e)=>this.pieceClicked(12) } />
+          <img id="img12" className="prisoner-image" alt="hiyoko" src={this._getPieceImage(1)} onClick={ (e)=>this.pieceClicked(12) } />
           <span className="prisoner-value" id="prisoner3">{this.state.prisoners[0]}</span>
         </div>
         <div className="prisoner-cell">
-          <img id="img13" className="prisoner-image" alt="zou" src={this.state.images[2]} onClick={ (e)=>this.pieceClicked(13) } />
+          <img id="img13" className="prisoner-image" alt="zou" src={this._getPieceImage(2)} onClick={ (e)=>this.pieceClicked(13) } />
           <span className="prisoner-value" id="prisoner4">{this.state.prisoners[1]}</span>
         </div>
         <div className="prisoner-cell">
-          <img id="img14" className="prisoner-image" alt="kirin" src={this.state.images[3]} onClick={ (e)=>this.pieceClicked(14) } />
+          <img id="img14" className="prisoner-image" alt="kirin" src={this._getPieceImage(3)} onClick={ (e)=>this.pieceClicked(14) } />
           <span className="prisoner-value" id="prisoner5">{this.state.prisoners[2]}</span>
         </div>
         <div className="prisoner-sep"></div>
@@ -250,6 +250,10 @@ class DoubutsuShogi extends StreamlitComponentBase<State> {
     return document.getElementById(`turn-indicator${index}`)
   }  
   //
+
+  private _getPieceImage = (index: number) => {
+    return pieceImages[this.state.pieceName][index]
+  }
 
   // Update state with a given data or action
   private refreshGame = (): void => {
@@ -640,7 +644,7 @@ class DoubutsuShogi extends StreamlitComponentBase<State> {
     const opponent = (this.state.board[index] < 0)
     const img = this._getImage(index)
     if (img != null) {
-      img.src = this.state.images[piece]
+      img.src = this._getPieceImage(piece)
       if (opponent) { img.classList.add("opponent") } else { img.classList.remove("opponent") }
     }
   }
