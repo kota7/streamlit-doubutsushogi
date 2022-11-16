@@ -7,13 +7,13 @@ import streamlit.components.v1 as components
 from doubutsushogi.game import State, Action, PRISONER_INDEX
 logger = getLogger(__name__)
 
-__version__ = "0.0.16"
+__version__ = "0.0.17"
 
 # Create a _RELEASE constant. We'll set this to False while we're developing
 # the component, and True when we're ready to package and distribute it.
 # (This is, of course, optional - there are innumerable ways to manage your
 # release process.)
-_RELEASE = False
+_RELEASE = True
 
 # Declare a Streamlit component. `declare_component` returns a function
 # that is used to create instances of the component. We're naming this
