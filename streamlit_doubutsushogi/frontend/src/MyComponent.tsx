@@ -207,17 +207,17 @@ class DoubutsuShogi extends StreamlitComponentBase<State> {
       </div>
 
       <div className="control-row">
-        <div id="to-start" className="control-button inactive" onClick={this.toStart}><strong>&lt;&lt;</strong></div>
-        <div id="to-prev" className="control-button inactive" onClick={this.toPrev}><strong>&lt;</strong></div>
+        <div id="to-start" className="control-button inactive" data-hover="Start" onClick={this.toStart}><strong>&lt;&lt;</strong></div>
+        <div id="to-prev" className="control-button inactive" data-hover="Back" onClick={this.toPrev}><strong>&lt;</strong></div>
         <div className="control-sep"></div>
-        <div id="to-next" className="control-button inactive" onClick={this.toNext}><strong>&gt;</strong></div>
-        <div id="to-last" className="control-button inactive" onClick={this.toLast}><strong>&gt;&gt;</strong></div>
-        <div className="control-sep"></div>
-        <div className="control-sep"></div>
+        <div id="to-next" className="control-button inactive" data-hover="Next" onClick={this.toNext}><strong>&gt;</strong></div>
+        <div id="to-last" className="control-button inactive" data-hover="End" onClick={this.toLast}><strong>&gt;&gt;</strong></div>
         <div className="control-sep"></div>
         <div className="control-sep"></div>
-        <div id="refresh" className="control-button" onClick={this.refreshGame}><strong>&#11119;</strong></div>
-        <div id="board-flip" className="control-button" onClick={this.flipBoard}><strong>&#8645;</strong></div>
+        <div className="control-sep"></div>
+        <div className="control-sep"></div>
+        <div id="refresh" className="control-button" data-hover="Initialize" onClick={this.refreshGame}><strong>&#11119;</strong></div>
+        <div id="board-flip" className="control-button" data-hover="Flip" onClick={this.flipBoard}><strong>&#8645;</strong></div>
       </div>
 
       </div>
