@@ -60,12 +60,10 @@ class DoubutsuShogi extends StreamlitComponentBase<State> {
 
   componentDidMount(): void {
     //console.log("start componentDidMount")
-    //this.state.board = this.state.initData.slice(0, 12)
-    //this.state.prisoners = this.state.initData.slice(12, 18)
-    //this.state.isTurn1 = this.state.initData[18]===1
     this._applyCurrentState()
     this._applySizes()
     this._reportCurrentStatus()  // This make sures that the Python side receives the starting state
+
     // This is copied from the source of StreamlitComponentBase
     // By this, we tell Streamlit that our height has changed.
     // https://github.com/streamlit/streamlit/blob/develop/component-lib/src/StreamlitReact.tsx
@@ -82,21 +80,28 @@ class DoubutsuShogi extends StreamlitComponentBase<State> {
     // Arguments that are passed to the plugin in Python are accessible
     // via `this.props.args`. Here, we access the "name" arg.
     //console.log(this.props)
+    
+    /* Args:
+      piecename: string
+                 Piece image name to show
+      ui_width: str or null
+                Width of UI
+      state: number[] or null
+             Data of game state to start with
+             board + prisnor + [mover]
+    */
+
     const piecename: keyof typeof pieceImages = this.props.args["piecename"]
     this.state.pieceName = piecename
     const ui_width = this.props.args["ui_width"]
-    // const ui_width = this.props.args["ui_width"]
-    // const prisoner_imgsize = this.props.args["prisoner_imgsize"]
-    // const cellsize = this.props.args["cellsize"]
-    // const piece_imgsize = this.props.args["piece_imgsize"]
-    // const init_data = this.props.args["init_data"]
-    // this.state.initData = init_data
-    //console.log(ui_width)
+    if (ui_width != null) {
+      this.state.uiWidth = ui_width; 
+    }
     const state_data = this.props.args["state"]  // non-default board state is given
     if (state_data != null) {
       console.log("board state:", state_data)
       // go to this state
-      this._setStateData(state_data, true)
+      this.StartFromThisState(state_data)
       this._reportCurrentStatus()
     }
 
@@ -117,29 +122,6 @@ class DoubutsuShogi extends StreamlitComponentBase<State> {
       style.border = borderStyling
       style.outline = borderStyling
     }
-
-    // console.log(pieceImages)
-    // // Update the image data to the state
-    // // todo: ideally we want to load this only once    
-    // const empty  = require(`./pieces/empty.png`)
-    // const hiyoko = require(`./pieces/${piecename}/hiyoko.png`)
-    // const zou    = require(`./pieces/${piecename}/zou.png`)
-    // const kirin  = require(`./pieces/${piecename}/kirin.png`)
-    // const tori   = require(`./pieces/${piecename}/tori.png`)
-    // const lion   = require(`./pieces/${piecename}/lion.png`)
-    //this.state.images = pieceImages[piecename]
-
-    // Store non-default size parameters to the state
-    //console.log(ui_width)
-    if (ui_width != null) { 
-      this.state.uiWidth = ui_width; 
-      //console.log(this.state)
-    }
-
-    //const texts = ["", "hiyoko", "zou", "kirin", "tori", "lion"]
-    //const srcs = this.state.board.map( (i: number) => this.state.images[Math.abs(i)])
-    //const alts = this.state.board.map( (i: number) => texts[Math.abs(i)])
-    //const opps = this.state.board.map( (i: number) => i < 0 ? "piece opponent" : i > 0 ? "piece own" : "piece empty")
 
     return (
       <div id="main-ui" className="doubutsushogi-ui">
@@ -251,9 +233,11 @@ class DoubutsuShogi extends StreamlitComponentBase<State> {
   }  
   //
 
+  // Piece image data
   private _getPieceImage = (index: number) => {
     return pieceImages[this.state.pieceName][index]
   }
+  //
 
   // Update state with a given data or action
   private refreshGame = (): void => {
@@ -261,11 +245,18 @@ class DoubutsuShogi extends StreamlitComponentBase<State> {
     this._reportCurrentStatus()  // this also update the visuals due to componentDidUpdate invoked
   }
 
+  private StartFromThisState = (data: number[]): void => {
+    if (!this._validateStateData(data)) { return }
+    this._setStateData(data, true)
+  }
+
   private _setStateData = (data: number[], clear_history: boolean): void => {
+    /*
     if (!this._validateStateData(data)) {
       //console.log("Invalid state data, will not apply")
       return
     }
+    */
     //console.log("Going to the state: ", data)
     this.state.board     = data.slice(0, 12)
     this.state.prisoners = data.slice(12, 18)

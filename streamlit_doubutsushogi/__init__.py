@@ -13,7 +13,7 @@ __version__ = "0.0.18"
 # the component, and True when we're ready to package and distribute it.
 # (This is, of course, optional - there are innumerable ways to manage your
 # release process.)
-_RELEASE = True
+_RELEASE = False
 
 # Declare a Streamlit component. `declare_component` returns a function
 # that is used to create instances of the component. We're naming this
@@ -51,7 +51,7 @@ else:
 # `declare_component` and call it done. The wrapper allows us to customize
 # our component's API: we can pre-process its input args, post-process its
 # output value, and add a docstring for users.
-def st_doubutsushogi(state=None, action=None, piecename="emoji1", ui_width=None, key=None):
+def st_doubutsushogi(state=None, piecename="emoji1", ui_width=None, key=None):
     #, ui_width=None, cellsize="100px", piece_imgsize="90", prisoner_imgsize="60px"
     """
     Create a new instance of st_doubutsushogi, a game UI.
@@ -59,7 +59,7 @@ def st_doubutsushogi(state=None, action=None, piecename="emoji1", ui_width=None,
     Args:
         state: State or None
             If given, the UI starts with this state.
-        action: Action or None
+        action: Action or None (Currently omitted)
             If given, the UI will execute this action.
         piecename: str 
             Accepts one of ("emoji1", "emoji2", "emoji3", "hiragana")
@@ -68,7 +68,16 @@ def st_doubutsushogi(state=None, action=None, piecename="emoji1", ui_width=None,
             If given, create the UI with this width.
             Currenly internal component sizes are calculated relative to this size.
 
-    Returns: list
+    Returns:
+        tuple of (State, Status, Action), each can be None.
+        At the beginning, return (None, None, None), which is the default value
+        When the board state is changed with no action (e.g. prev button),
+            return the state and the status but action is None.
+        When the board state is changed with an action, all three are returned.
+
+    Note:
+        In streamlit, controling the exact timing when the value is returned is hard.
+        We could receive the same value multiple times repeatedly.
     """
     # Call through to our private component function. Arguments we pass here
     # will be sent to the frontend, where they'll be available in an "args"
@@ -76,20 +85,16 @@ def st_doubutsushogi(state=None, action=None, piecename="emoji1", ui_width=None,
     #
     # "default" is a special argument that specifies the initial return
     # value of the component before the user has interacted with it.
-    # s = state or State.initial_state()
-    #print(s)
-    
-    # default = list(s._data) + [s.status]
 
     # pass list to the component
-    print(); print(state)
+    #print(); print(state)
     _state = None if state is None else state._data
-    _action = None if action is None else [action.piece, action.index_from, action.index_to]
+    #_action = None if action is None else [action.piece, action.index_from, action.index_to]
     assert piecename in ("emoji1", "emoji2", "emoji3", "hiragana")
     component_value = _component_func(
         piecename=piecename,
         state=_state,
-        action=_action,
+        #action=_action,
         ui_width=ui_width,
         # ui_width=1,
         # cellsize=cellsize,
@@ -102,7 +107,7 @@ def st_doubutsushogi(state=None, action=None, piecename="emoji1", ui_width=None,
 
     # We could modify the value returned from the component if we wanted.
     # There's no need to do this in our simple example - but it's an option.
-    logger.info("Received component value: %s", component_value)
+    #logger.info("Received component value: %s", component_value)
     return _parse_component_value(component_value)
 
 
