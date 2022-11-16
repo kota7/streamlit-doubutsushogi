@@ -81,8 +81,8 @@
 }
 
 .piece-image {
-  width: 90%;
-  padding: 5%;
+  width: 96%;
+  padding: 2%;
   margin: 0%;
 }
 
@@ -136,6 +136,7 @@
   font-size: 110%;
   /* Make sure the cursor does not change for text */
   cursor: default;
+  position: relative;  /* for compatibility with hover tooltops */
 
   /* Make the button text unselectable */
   -webkit-touch-callout: none;
@@ -146,11 +147,31 @@
   user-select: none;
 }
 
-.control-button:active{
+
+.control-button:before {
+  content: attr(data-hover);
+  width: max-content;
+  position: absolute;
+  visibility: hidden;
+  /* filter: opacity(0%); */
+  top: 110%;
+  left: 30%;
+  padding: 10%;
+  font-size: 80%;
+  background-color: #f5f5f5;
+  border: 1px #22222255 solid;
+  border-radius: 30%;
+}
+
+.control-button:hover:before {
+  visibility: visible;
+}
+
+.control-button:active {
   padding-top: 3px;
   padding-bottom: 2px;
   /* border:1px solid #334c66; */
-  background-color: #e5e5e5; 
+  background-color: #e5e5e5;
   /* color:#e0ebf5; */
   -webkit-box-shadow:inset 0px 0px 8px #334c66;
   -moz-box-shadow:inset 0px 0px 2px #3a6da0;

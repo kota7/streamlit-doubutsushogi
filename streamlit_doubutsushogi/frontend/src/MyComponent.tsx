@@ -4,6 +4,7 @@ import {
   withStreamlitConnection,
 } from "streamlit-component-lib"
 import React, { ReactNode } from "react"
+import { pieceImages } from "./images"
 
 interface State {
   //numClicks: number
@@ -11,7 +12,8 @@ interface State {
   prisoners: number[]     // prisoner counts, length 6
   isTurn1: boolean        // indicates that the next mover is the player 1 (bottom to top)
   selectedIndex: number   // index of selected cell, negative indicates no cell is selected
-  images: string[]        // piece images, length 6 (include empty)
+  //images: string[]        // piece images, length 6 (include empty)
+  pieceName: keyof typeof pieceImages       // name of piece type to use
   prevData: number[][]    // previous data list, older the first, format in: board + prisoners + [turn]
   nextData: number[][]    // next data list, newer the first, the same format as prevData
   uiWidth: string         // non-default ui width
@@ -38,8 +40,8 @@ class DoubutsuShogi extends StreamlitComponentBase<State> {
     nextData: [] as number[][],
 
     /* piece image data */
-    images: ["", "", "", "", ""],
-
+    //images: ["", "", "", "", ""],
+    pieceName: "emoji1" as keyof typeof pieceImages,
     /* Sizing */
     uiWidth: "",
 
@@ -63,7 +65,7 @@ class DoubutsuShogi extends StreamlitComponentBase<State> {
     //this.state.isTurn1 = this.state.initData[18]===1
     this._applyCurrentState()
     this._applySizes()
-    this._reportCurrentStatus()
+    this._reportCurrentStatus()  // This make sures that the Python side receives the starting state
     // This is copied from the source of StreamlitComponentBase
     // By this, we tell Streamlit that our height has changed.
     // https://github.com/streamlit/streamlit/blob/develop/component-lib/src/StreamlitReact.tsx
@@ -80,7 +82,8 @@ class DoubutsuShogi extends StreamlitComponentBase<State> {
     // Arguments that are passed to the plugin in Python are accessible
     // via `this.props.args`. Here, we access the "name" arg.
     //console.log(this.props)
-    const piecename = this.props.args["piecename"]
+    const piecename: keyof typeof pieceImages = this.props.args["piecename"]
+    this.state.pieceName = piecename
     const ui_width = this.props.args["ui_width"]
     // const ui_width = this.props.args["ui_width"]
     // const prisoner_imgsize = this.props.args["prisoner_imgsize"]
@@ -115,15 +118,16 @@ class DoubutsuShogi extends StreamlitComponentBase<State> {
       style.outline = borderStyling
     }
 
-    // Update the image data to the state
-    // todo: ideally we want to load this only once
-    const empty  = require(`./pieces/empty.png`)
-    const hiyoko = require(`./pieces/${piecename}/hiyoko.png`)
-    const zou    = require(`./pieces/${piecename}/zou.png`)
-    const kirin  = require(`./pieces/${piecename}/kirin.png`)
-    const tori   = require(`./pieces/${piecename}/tori.png`)
-    const lion   = require(`./pieces/${piecename}/lion.png`)
-    this.state.images = [ empty, hiyoko, zou, kirin, tori, lion ]
+    // console.log(pieceImages)
+    // // Update the image data to the state
+    // // todo: ideally we want to load this only once    
+    // const empty  = require(`./pieces/empty.png`)
+    // const hiyoko = require(`./pieces/${piecename}/hiyoko.png`)
+    // const zou    = require(`./pieces/${piecename}/zou.png`)
+    // const kirin  = require(`./pieces/${piecename}/kirin.png`)
+    // const tori   = require(`./pieces/${piecename}/tori.png`)
+    // const lion   = require(`./pieces/${piecename}/lion.png`)
+    //this.state.images = pieceImages[piecename]
 
     // Store non-default size parameters to the state
     //console.log(ui_width)
@@ -142,15 +146,15 @@ class DoubutsuShogi extends StreamlitComponentBase<State> {
 
       <div className="prisoner-row">
         <div className="prisoner-cell">
-          <img id="img15" className="prisoner-image" alt="hiyoko" src={this.state.images[1]} onClick={ (e)=>this.pieceClicked(15) } />
+          <img id="img15" className="prisoner-image" alt="hiyoko" src={this._getPieceImage(1)} onClick={ (e)=>this.pieceClicked(15) } />
           <span className="prisoner-value" id="prisoner3">{this.state.prisoners[3]}</span>
         </div>
         <div className="prisoner-cell">
-          <img id="img16" className="prisoner-image" alt="zou" src={this.state.images[2]} onClick={ (e)=>this.pieceClicked(15) } />
+          <img id="img16" className="prisoner-image" alt="zou" src={this._getPieceImage(2)} onClick={ (e)=>this.pieceClicked(15) } />
           <span className="prisoner-value" id="prisoner4">{this.state.prisoners[4]}</span>
         </div>
         <div className="prisoner-cell">
-          <img id="img17" className="prisoner-image" alt="kirin" src={this.state.images[3]} onClick={ (e)=>this.pieceClicked(15) } />
+          <img id="img17" className="prisoner-image" alt="kirin" src={this._getPieceImage(3)} onClick={ (e)=>this.pieceClicked(15) } />
           <span className="prisoner-value" id="prisoner5">{this.state.prisoners[5]}</span>
         </div>
         <div className="prisoner-sep"></div>
@@ -185,15 +189,15 @@ class DoubutsuShogi extends StreamlitComponentBase<State> {
 
       <div className="prisoner-row">
         <div className="prisoner-cell">
-          <img id="img12" className="prisoner-image" alt="hiyoko" src={this.state.images[1]} onClick={ (e)=>this.pieceClicked(12) } />
+          <img id="img12" className="prisoner-image" alt="hiyoko" src={this._getPieceImage(1)} onClick={ (e)=>this.pieceClicked(12) } />
           <span className="prisoner-value" id="prisoner3">{this.state.prisoners[0]}</span>
         </div>
         <div className="prisoner-cell">
-          <img id="img13" className="prisoner-image" alt="zou" src={this.state.images[2]} onClick={ (e)=>this.pieceClicked(13) } />
+          <img id="img13" className="prisoner-image" alt="zou" src={this._getPieceImage(2)} onClick={ (e)=>this.pieceClicked(13) } />
           <span className="prisoner-value" id="prisoner4">{this.state.prisoners[1]}</span>
         </div>
         <div className="prisoner-cell">
-          <img id="img14" className="prisoner-image" alt="kirin" src={this.state.images[3]} onClick={ (e)=>this.pieceClicked(14) } />
+          <img id="img14" className="prisoner-image" alt="kirin" src={this._getPieceImage(3)} onClick={ (e)=>this.pieceClicked(14) } />
           <span className="prisoner-value" id="prisoner5">{this.state.prisoners[2]}</span>
         </div>
         <div className="prisoner-sep"></div>
@@ -203,17 +207,17 @@ class DoubutsuShogi extends StreamlitComponentBase<State> {
       </div>
 
       <div className="control-row">
-        <div id="to-start" className="control-button inactive" onClick={this.toStart}><strong>&lt;&lt;</strong></div>
-        <div id="to-prev" className="control-button inactive" onClick={this.toPrev}><strong>&lt;</strong></div>
+        <div id="to-start" className="control-button inactive" data-hover="Start" onClick={this.toStart}><strong>&lt;&lt;</strong></div>
+        <div id="to-prev" className="control-button inactive" data-hover="Back" onClick={this.toPrev}><strong>&lt;</strong></div>
         <div className="control-sep"></div>
-        <div id="to-next" className="control-button inactive" onClick={this.toNext}><strong>&gt;</strong></div>
-        <div id="to-last" className="control-button inactive" onClick={this.toLast}><strong>&gt;&gt;</strong></div>
-        <div className="control-sep"></div>
-        <div className="control-sep"></div>
+        <div id="to-next" className="control-button inactive" data-hover="Next" onClick={this.toNext}><strong>&gt;</strong></div>
+        <div id="to-last" className="control-button inactive" data-hover="End" onClick={this.toLast}><strong>&gt;&gt;</strong></div>
         <div className="control-sep"></div>
         <div className="control-sep"></div>
-        <div id="refresh" className="control-button" onClick={this.refreshGame}><strong>&#11119;</strong></div>
-        <div id="board-flip" className="control-button" onClick={this.flipBoard}><strong>&#8645;</strong></div>
+        <div className="control-sep"></div>
+        <div className="control-sep"></div>
+        <div id="refresh" className="control-button" data-hover="Initialize" onClick={this.refreshGame}><strong>&#11119;</strong></div>
+        <div id="board-flip" className="control-button" data-hover="Flip" onClick={this.flipBoard}><strong>&#8645;</strong></div>
       </div>
 
       </div>
@@ -246,6 +250,10 @@ class DoubutsuShogi extends StreamlitComponentBase<State> {
     return document.getElementById(`turn-indicator${index}`)
   }  
   //
+
+  private _getPieceImage = (index: number) => {
+    return pieceImages[this.state.pieceName][index]
+  }
 
   // Update state with a given data or action
   private refreshGame = (): void => {
@@ -636,7 +644,7 @@ class DoubutsuShogi extends StreamlitComponentBase<State> {
     const opponent = (this.state.board[index] < 0)
     const img = this._getImage(index)
     if (img != null) {
-      img.src = this.state.images[piece]
+      img.src = this._getPieceImage(piece)
       if (opponent) { img.classList.add("opponent") } else { img.classList.remove("opponent") }
     }
   }
