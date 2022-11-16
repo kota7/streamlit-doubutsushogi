@@ -7,7 +7,7 @@ import pandas as pd
 import streamlit as st
 from streamlit_doubutsushogi import st_doubutsushogi
 from doubutsushogi.game import State
-from doubutsushogi.evaluate import evaluate_states, remaining_steps, optimal_path, MAXVALUE
+from doubutsushogi.evaluate import evaluate_states, remaining_steps, optimal_path, MAXVALUE, UNITVALUE
 
 def _ns(name):
     return f"study-{name}"
@@ -57,7 +57,7 @@ def _show_action_table(state):
         next_states_text = [s.text for s in next_states]
         next_values = evaluate_states([s for s in next_states])
         statuses = [s.status for s in next_states] 
-        next_values = [v if status == 0 else MAXVALUE if status == 1 else -MAXVALUE for v, status in zip(next_values, statuses)]
+        next_values = [v if status == 0 else MAXVALUE+UNITVALUE if status == 1 else -MAXVALUE-UNITVALUE for v, status in zip(next_values, statuses)]
 
         paths = [_optimal_path_text(s, depth=8) for s in next_states]
         df = pd.DataFrame({
