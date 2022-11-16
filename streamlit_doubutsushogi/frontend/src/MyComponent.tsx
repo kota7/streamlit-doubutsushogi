@@ -4,8 +4,7 @@ import {
   withStreamlitConnection,
 } from "streamlit-component-lib"
 import React, { ReactNode } from "react"
-
-
+import { pieceImages } from "./images"
 
 interface State {
   //numClicks: number
@@ -14,6 +13,7 @@ interface State {
   isTurn1: boolean        // indicates that the next mover is the player 1 (bottom to top)
   selectedIndex: number   // index of selected cell, negative indicates no cell is selected
   images: string[]        // piece images, length 6 (include empty)
+  //piecename: string       // name of piece type to use
   prevData: number[][]    // previous data list, older the first, format in: board + prisoners + [turn]
   nextData: number[][]    // next data list, newer the first, the same format as prevData
   uiWidth: string         // non-default ui width
@@ -41,7 +41,7 @@ class DoubutsuShogi extends StreamlitComponentBase<State> {
 
     /* piece image data */
     images: ["", "", "", "", ""],
-
+    
     /* Sizing */
     uiWidth: "",
 
@@ -82,7 +82,8 @@ class DoubutsuShogi extends StreamlitComponentBase<State> {
     // Arguments that are passed to the plugin in Python are accessible
     // via `this.props.args`. Here, we access the "name" arg.
     //console.log(this.props)
-    const piecename = this.props.args["piecename"]
+    const piecename: keyof typeof pieceImages = this.props.args["piecename"]
+    //this.state.piecename = piecename
     const ui_width = this.props.args["ui_width"]
     // const ui_width = this.props.args["ui_width"]
     // const prisoner_imgsize = this.props.args["prisoner_imgsize"]
@@ -117,15 +118,16 @@ class DoubutsuShogi extends StreamlitComponentBase<State> {
       style.outline = borderStyling
     }
 
-    // Update the image data to the state
-    // todo: ideally we want to load this only once
-    const empty  = require(`./pieces/empty.png`)
-    const hiyoko = require(`./pieces/${piecename}/hiyoko.png`)
-    const zou    = require(`./pieces/${piecename}/zou.png`)
-    const kirin  = require(`./pieces/${piecename}/kirin.png`)
-    const tori   = require(`./pieces/${piecename}/tori.png`)
-    const lion   = require(`./pieces/${piecename}/lion.png`)
-    this.state.images = [ empty, hiyoko, zou, kirin, tori, lion ]
+    // console.log(pieceImages)
+    // // Update the image data to the state
+    // // todo: ideally we want to load this only once    
+    // const empty  = require(`./pieces/empty.png`)
+    // const hiyoko = require(`./pieces/${piecename}/hiyoko.png`)
+    // const zou    = require(`./pieces/${piecename}/zou.png`)
+    // const kirin  = require(`./pieces/${piecename}/kirin.png`)
+    // const tori   = require(`./pieces/${piecename}/tori.png`)
+    // const lion   = require(`./pieces/${piecename}/lion.png`)
+    this.state.images = pieceImages[piecename]
 
     // Store non-default size parameters to the state
     //console.log(ui_width)
