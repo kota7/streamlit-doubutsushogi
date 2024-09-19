@@ -258,6 +258,10 @@ class DoubutsuShogi extends StreamlitComponentBase<State> {
   // Update state with a given data or action
   private refreshGame = (): void => {
     this._setStateData([-3, -5, -2, 0, -1, 0, 0, 1, 0, 2, 5, 3, 0, 0, 0, 0, 0, 0, 1], true)
+
+    // update visual
+    this._applyCurrentState()
+
     this._reportCurrentStatus()  // this also update the visuals due to componentDidUpdate invoked
   }
 
@@ -331,6 +335,10 @@ class DoubutsuShogi extends StreamlitComponentBase<State> {
     // set the prev data to the board state
     //this._setData(data)
     this._setStateData(data, false)
+
+    // update visual
+    this._applyCurrentState()
+
     // report to the python side
     this._reportCurrentStatus()
   }
@@ -347,6 +355,10 @@ class DoubutsuShogi extends StreamlitComponentBase<State> {
     // set the prev data to the board state
     //this._setData(data)
     this._setStateData(data, false)
+
+    // update visual
+    this._applyCurrentState()
+
     // report to the python side
     this._reportCurrentStatus()
   }
@@ -365,6 +377,10 @@ class DoubutsuShogi extends StreamlitComponentBase<State> {
     // set the prev data to the board state
     //this._setData(data)
     this._setStateData(data, false)
+
+    // update visual
+    this._applyCurrentState()
+
     // report to the python side
     this._reportCurrentStatus()
   }
@@ -383,6 +399,10 @@ class DoubutsuShogi extends StreamlitComponentBase<State> {
     // set the prev data to the board state
     //this._setData(data)
     this._setStateData(data, false)
+
+    // update visual
+    this._applyCurrentState()
+
     // report to the python side
     this._reportCurrentStatus()
   }
