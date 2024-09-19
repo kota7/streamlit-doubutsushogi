@@ -7,7 +7,7 @@ import streamlit.components.v1 as components
 from doubutsushogi.game import State, Action, PRISONER_INDEX
 logger = getLogger(__name__)
 
-__version__ = "0.0.18"
+__version__ = "0.0.19dev"
 
 # Create a _RELEASE constant. We'll set this to False while we're developing
 # the component, and True when we're ready to package and distribute it.
